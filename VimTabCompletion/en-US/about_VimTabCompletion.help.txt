@@ -1,0 +1,19 @@
+TOPIC
+    about_VimTabCompletion
+
+SHORT DESCRIPTION
+    Powershell Tab Completion for Vim
+
+LONG DESCRIPTION
+
+
+EXAMPLES
+
+NOTE:
+
+TROUBLESHOOTING NOTE:
+
+SEE ALSO
+
+KEYWORDS
+
