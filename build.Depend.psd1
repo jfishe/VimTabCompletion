@@ -1,5 +1,5 @@
-@{ 
-    PSDependOptions = @{ 
+@{
+    PSDependOptions = @{
         Target    = '$DependencyFolder/_build_dependencies_/'
         AddToPath = $true
     }
@@ -8,4 +8,5 @@
     BuildHelpers    = '1.1.4'
     Pester          = '4.3.1'
     PSScriptAnalyzer = '1.16.1'
+    TabExpansionPlusPlus = '1.2'
 }
