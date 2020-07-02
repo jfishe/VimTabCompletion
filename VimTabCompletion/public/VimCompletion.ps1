@@ -21,34 +21,7 @@
 function VimCompletion {
     param($wordToComplete, $commandAst, $cursorPosition)
 
-    function Get-VimArguments {
-
-        if (Get-Command -Name vim -ErrorAction SilentlyContinue) {
-            $VimArguments = & vim --help | Select-String -Pattern '^\s*[-+]'
-        } else {
-            return ''
-        }
-
-        $VimArguments | ForEach-Object -Process {
-            $ToolTip = $_.ToString()
-            $Argument = ($ToolTip -Split '\t+', 0, "RegexMatch")
-            $Length = [int] $Argument.Length
-            if ($Length -eq 2) {
-                $Argument = $Argument[0].Trim()
-            } else {
-                $Argument = $Argument.Trim().Split()[0]
-            }
-            $Argument = ($Argument -Split '[[<( ]')[0]
-            $ToolTip = $ToolTip.Trim()
-
-            [PSCustomObject]@{
-                Argument = "$Argument"
-                ToolTip  = "$ToolTip"
-            }
-        }
-    }
-
-    Get-VimArguments |
+    Get-VimArguments $wordToComplete $commandAst $cursorPosition |
         Where-Object { $_.Argument -clike "$wordToComplete*" } |
         Sort-Object -Property Argument -Unique -CaseSensitive |
         ForEach-Object -Process {
