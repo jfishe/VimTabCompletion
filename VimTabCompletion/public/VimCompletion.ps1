@@ -67,7 +67,7 @@ function VimCompletion {
     }
 }
 
-$Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff')
+$Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff', 'evim')
 
 Register-ArgumentCompleter `
     -Command $Vim `
