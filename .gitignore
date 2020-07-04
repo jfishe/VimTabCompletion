@@ -4,6 +4,7 @@
 
 ### PowerShell ###
 output/
+_build_dependencies_/
 
 # Created by https://www.toptal.com/developers/gitignore/api/powershell
 # Edit at https://www.toptal.com/developers/gitignore?templates=powershell
