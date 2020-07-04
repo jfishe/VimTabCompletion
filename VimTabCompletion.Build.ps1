@@ -69,7 +69,7 @@ function GetPublicFunctionInterfaces {
             Write-Verbose "$($function.Parameters[$parameter].Name)"
             $toAdd = "{0}:{1}" -f $function.Name, $function.Parameters[$parameter].Name
             $functionInterfaces.Add($toAdd)
-            
+
             foreach ($alias in $function.Parameters[$parameter].Aliases) {
                 Write-Verbose "$($function.Name)"
                 Write-Verbose "$($alias)"
@@ -98,7 +98,7 @@ function PublishTestResults {
     switch ($Env:BHBuildSystem)
     {
         'AppVeyor'
-        { 
+        {
             (New-Object 'System.Net.WebClient').UploadFile(
                 "https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)",
                 $Path)
@@ -198,9 +198,9 @@ Task BuildPSM1 {
 
     [void]$StringBuilder.AppendLine("`$publicFunctions = (Get-ChildItem -Path `"`$PSScriptRoot\public`" -Filter '*.ps1').BaseName")
     [void]$StringBuilder.AppendLine("Export-ModuleMember -Function `$publicFunctions")
-    
+
     Write-Output "  Creating module [$Script:ModulePath]"
-    Set-Content -Path $Script:ModulePath -Value $stringbuilder.ToString() 
+    Set-Content -Path $Script:ModulePath -Value $stringbuilder.ToString()
 }
 
 Task BuildPSD1 {
@@ -233,7 +233,7 @@ Task BuildPSD1 {
             Write-Output "      $interface"
         }
     }
-    
+
     $version = [Version](Get-Metadata -Path $Script:ManifestPath -PropertyName "ModuleVersion")
 
     # Don't bump major version if in pre-release
@@ -271,6 +271,7 @@ Task Test {
         Strict = $true;
         OutputFormat = 'NUnitXml';
         OutputFile = $Script:TestFile;
+        Path = "$PSScriptRoot\tests";
     }
     $testResults = Invoke-Pester @pesterParams
 
