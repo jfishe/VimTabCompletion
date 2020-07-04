@@ -17,18 +17,19 @@ the project root directory:
 ``` powershell
 $Env:PublishToRepo = 'LocalRepo1' # Default: 'PSGallery'
 
-# Default: 'Unknown' when building locally
-$Env:BUILD_REPOSITORY_URI = 'LocalRepo1'
-
 # Not required if you ran .\build.ps1 in the current shell
 $Env:PSModulePath = "$(pwd)\_build_dependencies_\;$env:PSModulePath"
 
 Set-BuildEnvironment -Force
+
+# Default: 'Unknown' when building locally. Reset by build.ps1.
+$Env:BHBuildSystem = 'LocalRepo1'
+
+# Override
 .\build.ps1 -Task Distribute
 ```
 
 ## Testing
 
 `.\build.ps1 -Task Test`
-
 
