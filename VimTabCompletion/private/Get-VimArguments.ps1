@@ -1,29 +1,26 @@
 <#
 .SYNOPSIS
-Short Description
-
+    Convert Vim OPTIONS into PSCustomObject with Argument and ToolTip properties.
 .DESCRIPTION
-Full Description
-
-.PARAMETER wordToComplete
-A description of a parameter.
-
-.PARAMETER commandAst
-A description of a parameter.
-
-.PARAMETER cursorPosition
-A description of a parameter.
-
+    Parse vim --help into a list of PSCustomObject with Argument and ToolTip
+    properties.
 .EXAMPLE
-Example
+    None
+.INPUTS
+    None
+.OUTPUTS
+    A list of
+
+    [PSCustomObject]@{
+        Argument = "Vim OPTION"
+        ToolTip  = "Vim OPTION with help"
+    }
 .NOTES
-notes
-.LINK
-online help
+    None
 #>
 
 function Get-VimArguments {
-    param($wordToComplete, $commandAst, $cursorPosition)
+    param()
 
     if (Get-Command -Name vim -ErrorAction SilentlyContinue) {
         $VimArguments = & vim --help | Select-String -Pattern '^\s*[-+]'
