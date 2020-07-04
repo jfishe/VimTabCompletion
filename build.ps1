@@ -12,7 +12,8 @@ if (!(Get-PackageProvider -Name 'NuGet')) {
 }
 
 Write-Output "Install/Import Build-Dependent Modules"
-$PSDependVersion = '0.2.3'
+# $PSDependVersion = '0.2.3'
+$PSDependVersion = '0.3.7'
 if (!(Get-InstalledModule -Name 'PSDepend' -RequiredVersion $PSDependVersion -ErrorAction 'SilentlyContinue')) {
     Install-Module -Name 'PSDepend' -RequiredVersion $PSDependVersion -Force -Scope 'CurrentUser'
 }
