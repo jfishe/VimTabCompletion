@@ -46,32 +46,54 @@
 #>
 
 function VimCompletion {
-    param($wordToComplete, $commandAst, $cursorPosition)
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]
+        $wordToComplete,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [System.Management.Automation.Language.CommandAst]
+        $commandAst,
+        [Parameter(Mandatory = $true, Position = 2)]
+        [Int32]
+        $cursorPosition
+    )
 
-    $global:dude = $commandAst
+    $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
 
-    if ($commandAst.CommandElements[-1].Value -match "^--remote$") {
-        Get-VimChildItem
-        return
-    }
-    Get-VimArguments |
-    Where-Object { $_.Argument -clike "$wordToComplete*" } |
-    Sort-Object -Property Argument -Unique -CaseSensitive |
-    ForEach-Object -Process {
-        $completionText = $_.Argument
-        $listItemText = $_.Argument
+    if ($commandAst.CommandElements[-1].Value -eq '--servername') {
+        & vim --serverlist |
+        Where-Object { $_ -like "$wordToComplete*" } |
+        Sort-Object -Unique |
+        ForEach-Object {
+            $completionText = $_
+            $listItemText = $_
 
-        if ($completionText -eq $previousCompletionText) {
-            # Differentiate completions that differ only by case otherwise
-            # PowerShell will view them as duplicate.
-            $listItemText += ' '
+            New-Object System.Management.Automation.CompletionResult `
+                $completionText, $listItemText, 'ParameterValue', $listItemText
         }
-        $previousCompletionText = $completionText
+    }
+    switch -Regex ($wordToComplete) {
+        '^\-|^\+' {
+            Get-VimArguments |
+            Where-Object { $_.Argument -clike "$wordToComplete*" } |
+            Sort-Object -Property Argument -Unique -CaseSensitive |
+            ForEach-Object -Process {
+                $completionText = $_.Argument
+                $listItemText = $_.Argument
 
-        New-Object System.Management.Automation.CompletionResult `
-            $completionText, $listItemText, 'ParameterValue', $_.ToolTip
-        # New-TabItem -CompletionText $completionText -ListItemText $listItemText `
-        #     -ResultType ParameterName -ToolTip $_.ToolTip
+                if ($completionText -eq $previousCompletionText) {
+                    # Differentiate completions that differ only by case
+                    # otherwise PowerShell will view them as duplicate.
+                    $listItemText += ' '
+                }
+                $previousCompletionText = $completionText
+
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, 'ParameterValue', $_.ToolTip
+            }
+        }
+        Default { return }
     }
 }
 
