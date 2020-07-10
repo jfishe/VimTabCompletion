@@ -59,9 +59,9 @@ function VimCompletion {
         $cursorPosition
     )
 
-    $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
+    # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
 
-    if ($commandAst.CommandElements[-1].Value -eq '--servername') {
+    if ($commandAst.CommandElements[-1].Value -ceq '--servername') {
         & vim --serverlist |
         Where-Object { $_ -like "$wordToComplete*" } |
         Sort-Object -Unique |
@@ -72,7 +72,23 @@ function VimCompletion {
             New-Object System.Management.Automation.CompletionResult `
                 $completionText, $listItemText, 'ParameterValue', $listItemText
         }
+
         return
+
+    } elseif ($commandAst.CommandElements[-1].Extent.Text -cmatch '-r|-L') {
+        Get-ChildItem -File -Hidden -Path "~\vimfiles/swap//" `
+            -Name "$wordToComplete*" |
+        ForEach-Object -Process {
+            $completionText = Convert-Path $_.PSPath
+            $listItemText = $_
+                $toolTip = $_
+
+            New-Object System.Management.Automation.CompletionResult `
+                $completionText, $listItemText, 'ProviderItem', $toolTip
+        }
+
+        return
+
     }
     switch -Regex ($wordToComplete) {
         '^-|^\+' {
@@ -82,6 +98,7 @@ function VimCompletion {
             ForEach-Object -Process {
                 $completionText = $_.Argument
                 $listItemText = $_.Argument
+                $toolTip = $_.ToolTip
 
                 if ($completionText -eq $previousCompletionText) {
                     # Differentiate completions that differ only by case
@@ -93,11 +110,11 @@ function VimCompletion {
                 if ($_.ExcludeArgument) {
                     $excludePattern = [Regex]::new($_.ExcludeArgument)
                     if ($excludePattern.IsMatch($commandAst.Parent)) {
-                    return
+                        return
                     }
                 }
                 New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'Text', $_.ToolTip
+                    $completionText, $listItemText, 'Text', $toolTip
             }
         }
         Default { return }
