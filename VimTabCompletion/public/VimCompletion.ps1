@@ -72,9 +72,10 @@ function VimCompletion {
             New-Object System.Management.Automation.CompletionResult `
                 $completionText, $listItemText, 'ParameterValue', $listItemText
         }
+        return
     }
     switch -Regex ($wordToComplete) {
-        '^\-|^\+' {
+        '^-|^\+' {
             Get-VimArguments |
             Where-Object { $_.Argument -clike "$wordToComplete*" } |
             Sort-Object -Property Argument -Unique -CaseSensitive |
@@ -89,8 +90,14 @@ function VimCompletion {
                 }
                 $previousCompletionText = $completionText
 
+                if ($_.ExcludeArgument) {
+                    $excludePattern = [Regex]::new($_.ExcludeArgument)
+                    if ($excludePattern.IsMatch($commandAst.Parent)) {
+                    return
+                    }
+                }
                 New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'ParameterValue', $_.ToolTip
+                    $completionText, $listItemText, 'Text', $_.ToolTip
             }
         }
         Default { return }
