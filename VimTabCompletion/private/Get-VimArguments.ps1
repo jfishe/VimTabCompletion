@@ -24,6 +24,13 @@ function Get-VimArguments {
 
     $Argument = @(
         [PSCustomObject]@{
+            Argument = '--'
+            ToolTip  = 'Only file names after this'
+        }
+    )
+
+    $Argument += @(
+        [PSCustomObject]@{
             Argument = '-m'
             ToolTip  = 'modifications (writing files) not allowed]'
         }
@@ -257,11 +264,11 @@ function Get-VimArguments {
     $Argument += @(
         [PSCustomObject]@{
             Argument = '+'
-            ToolTip  = 'Start at end of file'
+            ToolTip  = 'Start at line <lnum>'
         }
         [PSCustomObject]@{
             Argument = '+ '
-            ToolTip  = 'Start at line <lnum>'
+            ToolTip  = 'Start at end of file'
         }
     )
     # TODO:  <04-07-20, jdfenw@gmail.com
