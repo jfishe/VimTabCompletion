@@ -59,9 +59,9 @@ function VimCompletion {
         $cursorPosition
     )
 
-    # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
+    $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
 
-    if ($commandAst.CommandElements[-1].Value -ceq '--servername') {
+    if ($commandAst.CommandElements[-1..-2].Value -ceq '--servername') {
         & vim --serverlist |
         Where-Object { $_ -like "$wordToComplete*" } |
         Sort-Object -Unique |
@@ -75,13 +75,14 @@ function VimCompletion {
 
         return
 
-    } elseif ($commandAst.CommandElements[-1].Extent.Text -cmatch '-r|-L') {
-        Get-ChildItem -File -Hidden -Path "~\vimfiles/swap//" `
-            -Name "$wordToComplete*" |
+    } elseif ($commandAst.CommandElements[-1..-2].Extent.Text -cmatch '-r|-L') {
+        Get-VimSwapFile |
+        Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
+        # Sort-Object -Property Argument -Unique -CaseSensitive |
         ForEach-Object -Process {
-            $completionText = Convert-Path $_.PSPath
-            $listItemText = $_
-                $toolTip = $_
+            $completionText = $_.CompletionText
+            $listItemText = $_.ListItemText
+            $toolTip = $_.ToolTip
 
             New-Object System.Management.Automation.CompletionResult `
                 $completionText, $listItemText, 'ProviderItem', $toolTip
