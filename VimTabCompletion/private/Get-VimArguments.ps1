@@ -1,19 +1,24 @@
 <#
 .SYNOPSIS
-    Convert Vim OPTIONS into PSCustomObject with Argument and ToolTip properties.
+    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip
+    properties. ExcludeArgument property lists incompatible OPTIONS.
 .DESCRIPTION
-    Parse vim --help into a list of PSCustomObject with Argument and ToolTip
-    properties.
+    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip
+    properties. ExcludeArgument property lists incompatible OPTIONS separated
+    with the Regex 'or', '|', operator.
+
+    CompletionText and ToolTip are required.
 .EXAMPLE
     None
 .INPUTS
     None
 .OUTPUTS
-    A list of
+    An arrary of
 
     [PSCustomObject]@{
-        Argument = "Vim OPTION"
+        CompletionText = "Vim OPTION"
         ToolTip  = "Vim OPTION with help"
+        ExcludeArgument = '-v|-E|-d|-y'
     }
 .NOTES
     None
@@ -24,251 +29,251 @@ function Get-VimArguments {
 
     $Argument = @(
         [PSCustomObject]@{
-            Argument = '--'
-            ToolTip  = 'Only file names after this'
+            CompletionText = '--'
+            ToolTip        = 'Only file names after this'
         }
     )
 
     $Argument += @(
         [PSCustomObject]@{
-            Argument = '-m'
-            ToolTip  = 'modifications (writing files) not allowed]'
+            CompletionText = '-m'
+            ToolTip        = 'modifications (writing files) not allowed]'
         }
         [PSCustomObject]@{
-            Argument = '-M'
-            ToolTip  = 'modifications in text not allowed]'
+            CompletionText = '-M'
+            ToolTip        = 'modifications in text not allowed]'
         }
         [PSCustomObject]@{
-            Argument = '-b'
-            ToolTip  = 'binary mode]'
+            CompletionText = '-b'
+            ToolTip        = 'binary mode]'
         }
         [PSCustomObject]@{
-            Argument = '-l'
-            ToolTip  = 'lisp mode]'
+            CompletionText = '-l'
+            ToolTip        = 'lisp mode]'
         }
         [PSCustomObject]@{
-            Argument = '-V'
-            ToolTip  = 'verbosity level]::verbosity [10]:->verbosity'
+            CompletionText = '-V'
+            ToolTip        = 'verbosity level]::verbosity [10]:->verbosity'
         }
         [PSCustomObject]@{
-            Argument = '-D'
-            ToolTip  = 'debugging mode]'
+            CompletionText = '-D'
+            ToolTip        = 'debugging mode]'
         }
         [PSCustomObject]@{
-            Argument = '-n'
-            ToolTip  = 'no swap file (memory only)]'
+            CompletionText = '-n'
+            ToolTip        = 'no swap file (memory only)]'
         }
         [PSCustomObject]@{
-            Argument = '-r'
-            ToolTip  = 'list swap files and exit or recover from a swap file]::swap file:_vim_files -g "*.sw?(-.)"'
+            CompletionText = '-r'
+            ToolTip        = 'list swap files and exit or recover from a swap file]::swap file:_vim_files -g "*.sw?(-.)"'
         }
         [PSCustomObject]@{
-            Argument = '-L'
-            ToolTip  = 'list swap files and exit or recover from a swap file]::swap file:_vim_files -g "*.sw?(-.)"'
+            CompletionText = '-L'
+            ToolTip        = 'list swap files and exit or recover from a swap file]::swap file:_vim_files -g "*.sw?(-.)"'
         }
         [PSCustomObject]@{
-            Argument        = '-A'
+            CompletionText  = '-A'
             ToolTip         = 'start in Arabic mode]'
             ExcludeArgument = '-H|-F'
         }
         [PSCustomObject]@{
-            Argument        = '-H'
+            CompletionText  = '-H'
             ToolTip         = 'start in Hebrew mode]'
             ExcludeArgument = '-A|-F'
         }
         [PSCustomObject]@{
-            Argument        = '-F'
+            CompletionText  = '-F'
             ToolTip         = 'start in Farsi mode]'
             ExcludeArgument = '-A|-H'
         }
         [PSCustomObject]@{
-            Argument = '-u'
-            ToolTip  = 'use given vimrc file instead of default .vimrc]:config:->config'
+            CompletionText = '-u'
+            ToolTip        = 'use given vimrc file instead of default .vimrc]:config:->config'
         }
         [PSCustomObject]@{
-            Argument = '--noplugin'
-            ToolTip  = "don't load plugin scripts"
+            CompletionText = '--noplugin'
+            ToolTip        = "don't load plugin scripts"
         }
         [PSCustomObject]@{
-            Argument = '-o'
-            ToolTip  = 'number of windows to open (default: one for each file)]::window count: '
+            CompletionText = '-o'
+            ToolTip        = 'number of windows to open (default: one for each file)]::window count: '
         }
         [PSCustomObject]@{
-            Argument = '-O'
-            ToolTip  = 'number of windows to vertically split open (default is one for each file)]::window count: '
+            CompletionText = '-O'
+            ToolTip        = 'number of windows to vertically split open (default is one for each file)]::window count: '
         }
         [PSCustomObject]@{
-            Argument = '-p'
-            ToolTip  = 'number of tabs to open (default: one for each file)]::tab count: '
+            CompletionText = '-p'
+            ToolTip        = 'number of tabs to open (default: one for each file)]::tab count: '
         }
         [PSCustomObject]@{
-            Argument = '-q'
-            ToolTip  = 'quickfix file]::file:_files'
+            CompletionText = '-q'
+            ToolTip        = 'quickfix file]::file:_files'
         }
         [PSCustomObject]@{
-            Argument = '--cmd'
-            ToolTip  = 'execute given command before loading any RC files]:command: '
+            CompletionText = '--cmd'
+            ToolTip        = 'execute given command before loading any RC files]:command: '
         }
         [PSCustomObject]@{
-            Argument = '-c'
-            ToolTip  = 'execute given command after loading the first file]:command: '
+            CompletionText = '-c'
+            ToolTip        = 'execute given command after loading the first file]:command: '
         }
         [PSCustomObject]@{
-            Argument = '-S'
-            ToolTip  = 'source a session file after loading the first file]::session file:_files'
+            CompletionText = '-S'
+            ToolTip        = 'source a session file after loading the first file]::session file:_files'
         }
         [PSCustomObject]@{
-            Argument = '-s'
-            ToolTip  = 'read normal-mode commands from script file]:script file:_files'
+            CompletionText = '-s'
+            ToolTip        = 'read normal-mode commands from script file]:script file:_files'
         }
         [PSCustomObject]@{
-            Argument = '-w'
-            ToolTip  = 'append all typed commands to given file]:output file:_files'
+            CompletionText = '-w'
+            ToolTip        = 'append all typed commands to given file]:output file:_files'
         }
         [PSCustomObject]@{
-            Argument = '-W'
-            ToolTip  = 'write all typed commands to given file, overwriting existing file]:output file:_files'
+            CompletionText = '-W'
+            ToolTip        = 'write all typed commands to given file, overwriting existing file]:output file:_files'
         }
         [PSCustomObject]@{
-            Argument = '--startuptime'
-            ToolTip  = 'write startup timing messages to given file]:log file:_files'
+            CompletionText = '--startuptime'
+            ToolTip        = 'write startup timing messages to given file]:log file:_files'
         }
         [PSCustomObject]@{
-            Argument = '--help'
-            ToolTip  = 'print help and exit]'
+            CompletionText = '--help'
+            ToolTip        = 'print help and exit]'
         }
         [PSCustomObject]@{
-            Argument = '-h'
-            ToolTip  = 'print help and exit]'
+            CompletionText = '-h'
+            ToolTip        = 'print help and exit]'
         }
         [PSCustomObject]@{
-            Argument = '--version'
-            ToolTip  = 'print version information and exit'
+            CompletionText = '--version'
+            ToolTip        = 'print version information and exit'
         }
         [PSCustomObject]@{
-            Argument = '-t'
-            ToolTip  = 'edit file where tag is defined]:tag:_complete_tag'
+            CompletionText = '-t'
+            ToolTip        = 'edit file where tag is defined]:tag:_complete_tag'
         }
     )
 
     $Argument += @(
         [PSCustomObject]@{
-            Argument        = '-e'
+            CompletionText  = '-e'
             ToolTip         = 'ex mode]'
             ExcludeArgument = '-v|-E|-d|-y'
         }
         [PSCustomObject]@{
-            Argument        = '-E'
+            CompletionText  = '-E'
             ToolTip         = 'improved ex mode]'
             ExcludeArgument = '-v|-e|-d|-y'
         }
         [PSCustomObject]@{
-            Argument        = '-v'
+            CompletionText  = '-v'
             ToolTip         = 'vi mode]'
             ExcludeArgument = '-e|-E|-s|-d|-y'
         }
         [PSCustomObject]@{
-            Argument        = '-y'
+            CompletionText  = '-y'
             ToolTip         = 'easy mode]'
             ExcludeArgument = '-v|-e|-E|-s|-d'
         }
         [PSCustomObject]@{
-            Argument = '-C'
-            ToolTip  = 'start in compatible mode]'
+            CompletionText = '-C'
+            ToolTip        = 'start in compatible mode]'
         }
         [PSCustomObject]@{
-            Argument = '-N'
-            ToolTip  = 'start in incompatible mode]'
+            CompletionText = '-N'
+            ToolTip        = 'start in incompatible mode]'
         }
         [PSCustomObject]@{
-            Argument = '-T'
-            ToolTip  = 'set terminal type]:::_terminals'
+            CompletionText = '-T'
+            ToolTip        = 'set terminal type]:::_terminals'
         }
         [PSCustomObject]@{
-            Argument = '--not-a-term'
-            ToolTip  = 'skip warning for input/output not being a terminal]'
+            CompletionText = '--not-a-term'
+            ToolTip        = 'skip warning for input/output not being a terminal]'
         }
         [PSCustomObject]@{
-            Argument = '--ttyfail'
-            ToolTip  = 'exit if input or output is not a terminal]'
+            CompletionText = '--ttyfail'
+            ToolTip        = 'exit if input or output is not a terminal]'
         }
         [PSCustomObject]@{
-            Argument = '-X'
-            ToolTip  = 'do not connect to X server]'
+            CompletionText = '-X'
+            ToolTip        = 'do not connect to X server]'
         }
         [PSCustomObject]@{
-            Argument = '-x'
-            ToolTip  = 'edit encrypted files]'
+            CompletionText = '-x'
+            ToolTip        = 'edit encrypted files]'
         }
         [PSCustomObject]@{
-            Argument = '--remote'
-            ToolTip  = 'edit given files in a vim server if possible]:*:file:_vim_files'
+            CompletionText = '--remote'
+            ToolTip        = 'edit given files in a vim server if possible]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-silent'
-            ToolTip  = 'as --remote but without complaining if not possible]:*:file:_vim_files'
+            CompletionText = '--remote-silent'
+            ToolTip        = 'as --remote but without complaining if not possible]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-wait'
-            ToolTip  = 'as --remote but wait for files to have been edited]:*:file:_vim_files'
+            CompletionText = '--remote-wait'
+            ToolTip        = 'as --remote but wait for files to have been edited]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-wait-silent'
-            ToolTip  = 'as --remote-wait but without complaining if not possible]:*:file:_vim_files'
+            CompletionText = '--remote-wait-silent'
+            ToolTip        = 'as --remote-wait but without complaining if not possible]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-send'
-            ToolTip  = 'send given keys to vim server if possible]:keys: '
+            CompletionText = '--remote-send'
+            ToolTip        = 'send given keys to vim server if possible]:keys: '
         }
         [PSCustomObject]@{
-            Argument = '--remote-tab'
-            ToolTip  = 'as --remote but open tab page for each file]:*:file:_vim_files'
+            CompletionText = '--remote-tab'
+            ToolTip        = 'as --remote but open tab page for each file]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-tab-silent'
-            ToolTip  = 'as --remote-silent but open tab page for each file]:*:file:_vim_files'
+            CompletionText = '--remote-tab-silent'
+            ToolTip        = 'as --remote-silent but open tab page for each file]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-tab-wait'
-            ToolTip  = 'as --remote-wait but open tab page for each file]:*:file:_vim_files'
+            CompletionText = '--remote-tab-wait'
+            ToolTip        = 'as --remote-wait but open tab page for each file]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-tab-wait-silent'
-            ToolTip  = 'as --remote-wait-silent but open tab page for each file]:*:file:_vim_files'
+            CompletionText = '--remote-tab-wait-silent'
+            ToolTip        = 'as --remote-wait-silent but open tab page for each file]:*:file:_vim_files'
         }
         [PSCustomObject]@{
-            Argument = '--remote-expr'
-            ToolTip  = 'evaluate given expression in a vim server and print result]:expression: '
+            CompletionText = '--remote-expr'
+            ToolTip        = 'evaluate given expression in a vim server and print result]:expression: '
         }
         [PSCustomObject]@{
-            Argument = '--literal'
-            ToolTip  = 'do not expand wildcards in arguments (this is useless with ZSH)]'
+            CompletionText = '--literal'
+            ToolTip        = 'do not expand wildcards in arguments (this is useless with ZSH)]'
         }
         [PSCustomObject]@{
-            Argument = '--serverlist'
-            ToolTip  = 'list available vim servers and exit]'
+            CompletionText = '--serverlist'
+            ToolTip        = 'list available vim servers and exit]'
         }
         [PSCustomObject]@{
-            Argument = '--servername'
-            ToolTip  = 'name of vim server to send to or name of server to become]:server name:->server'
+            CompletionText = '--servername'
+            ToolTip        = 'name of vim server to send to or name of server to become]:server name:->server'
         }
         [PSCustomObject]@{
-            Argument = '-i'
-            ToolTip  = 'use specified viminfo file]:viminfo file [~/.viminfo]:_files'
+            CompletionText = '-i'
+            ToolTip        = 'use specified viminfo file]:viminfo file [~/.viminfo]:_files'
         }
         [PSCustomObject]@{
-            Argument = '--clean'
-            ToolTip  = 'start with defaults in non-compatible mode]'
+            CompletionText = '--clean'
+            ToolTip        = 'start with defaults in non-compatible mode]'
         }
     )
     $Argument += @(
         [PSCustomObject]@{
-            Argument = '+'
-            ToolTip  = 'Start at line <lnum>'
+            CompletionText = '+'
+            ToolTip        = 'Start at line <lnum>'
         }
         [PSCustomObject]@{
-            Argument = '+ '
-            ToolTip  = 'Start at end of file'
+            CompletionText = '+ '
+            ToolTip        = 'Start at end of file'
         }
     )
     # TODO:  <04-07-20, jdfenw@gmail.com

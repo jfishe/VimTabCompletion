@@ -94,11 +94,11 @@ function VimCompletion {
     switch -Regex ($wordToComplete) {
         '^-|^\+' {
             Get-VimArguments |
-            Where-Object { $_.Argument -clike "$wordToComplete*" } |
-            Sort-Object -Property Argument -Unique -CaseSensitive |
+            Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
+            Sort-Object -Property CompletionText -Unique -CaseSensitive |
             ForEach-Object -Process {
-                $completionText = $_.Argument
-                $listItemText = $_.Argument
+                $completionText = $_.CompletionText
+                $listItemText = $_.CompletionText
                 $toolTip = $_.ToolTip
 
                 if ($completionText -eq $previousCompletionText) {
