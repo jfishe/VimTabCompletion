@@ -93,7 +93,7 @@ function VimCompletion {
     }
     switch -Regex ($wordToComplete) {
         '^-|^\+' {
-            Get-VimArguments |
+            Get-VimOption |
             Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
             ForEach-Object -Process {

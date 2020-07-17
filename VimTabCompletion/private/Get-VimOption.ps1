@@ -24,7 +24,7 @@
     None
 #>
 
-function Get-VimArguments {
+function Get-VimOption {
     param()
 
     $Argument = @(
