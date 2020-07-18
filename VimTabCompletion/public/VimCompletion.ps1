@@ -61,6 +61,8 @@ function VimCompletion {
 
     $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
 
+    $AstExtent = $commandAst.Extent.Text.split()
+
     if ($commandAst.CommandElements[-1..-2].Value -ceq '--servername') {
         & vim --serverlist |
         Where-Object { $_ -like "$wordToComplete*" } |
@@ -75,7 +77,7 @@ function VimCompletion {
 
         return
 
-    } elseif ($commandAst.CommandElements[-1..-2].Extent.Text -cmatch '-r|-L') {
+    } elseif ($AstExtent[-1..-2] -cmatch '^-r$|^-L$') {
         Get-VimSwapFile |
         Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
         # Sort-Object -Property Argument -Unique -CaseSensitive |
