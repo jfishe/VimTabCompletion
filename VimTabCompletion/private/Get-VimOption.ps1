@@ -95,14 +95,12 @@ function Get-VimOption {
             CompletionText = '-n'
             ToolTip        = "-n`tNo swap file, use memory only"
         }
-        # Add space at end to allow expansion of swap files from vim -L|-r
         [PSCustomObject]@{
-            CompletionText = '-r '
+            CompletionText = '-r'
             ToolTip        = "-r [swap file]`tList swap files and exit or recover from a swap file. Tab to list swap files"
         }
-        # Add space at end to allow expansion of swap files from vim -L|-r
         [PSCustomObject]@{
-            CompletionText = '-L '
+            CompletionText = '-L'
             ToolTip        = "-L [swap file]`tList swap files and exit or recover from a swap file. Tab to list swap files"
         }
         [PSCustomObject]@{
@@ -141,23 +139,23 @@ function Get-VimOption {
             ToolTip        = "-p[N]`tOpen N tab pages (default: one for each file)::tab count: "
         }
         [PSCustomObject]@{
-            CompletionText = '-q '
+            CompletionText = '-q'
             ToolTip        = "-q [errorfile]`tEdit file with first error quickfix file]::file:_files"
         }
         [PSCustomObject]@{
-            CompletionText = '--cmd '
+            CompletionText = '--cmd'
             ToolTip        = "--cmd <command>`tExecute <command> before loading any vimrc file"
         }
         [PSCustomObject]@{
-            CompletionText = '-c '
+            CompletionText = '-c'
             ToolTip        = "-c <command>`tExecute <command> after loading the first file"
         }
         [PSCustomObject]@{
-            CompletionText = '-S '
+            CompletionText = '-S'
             ToolTip        = "-S <session>`tSource file <session> after loading the first file::session file:_files"
         }
         [PSCustomObject]@{
-            CompletionText = '-s '
+            CompletionText = '-s'
             ToolTip        = "-s <scriptin>`tRead Normal mode commands from file <scriptin>:script file:_files"
         }
         [PSCustomObject]@{
@@ -220,7 +218,7 @@ function Get-VimOption {
             ToolTip        = "-N`tNot fully Vi compatible: 'nocompatible'"
         }
         [PSCustomObject]@{
-            CompletionText = '-T '
+            CompletionText = '-T'
             ToolTip        = "-T <terminal>`tSet terminal type to <terminal>:::_terminals"
         }
         [PSCustomObject]@{
@@ -237,51 +235,59 @@ function Get-VimOption {
         #     ToolTip        = 'Do not connect to X server'
         # }
         [PSCustomObject]@{
-            CompletionText = '-x '
+            CompletionText = '-x'
             ToolTip        = "-x`tEdit encrypted files"
         }
+    )
+    $Remote = 'Edit <files> in a Vim server if possible'
+    $Silent = 'don''t complain if there is no server'
+    $Wait = 'wait for files to have been edited'
+    $Tab = 'but open tab page for each file'
+    $Argument += @(
         [PSCustomObject]@{
-            CompletionText = '--remote '
-            ToolTip        = "--remote <files>`tEdit <files> in a Vim server if possible"
+            CompletionText = '--remote'
+            ToolTip        = "--remote <files>`t$Remote"
         }
         [PSCustomObject]@{
-            CompletionText = '--remote-silent '
-            ToolTip        = "--remote-silent <files>  Same as --remote, but don't complain if there is no server"
+            CompletionText = '--remote-silent'
+            ToolTip        = "--remote-silent <files>`t$Remote and $Silent"
         }
         [PSCustomObject]@{
-            CompletionText = '--remote-wait '
-            ToolTip        = "--remote-wait <files>  Same as --remote but wait for files to have been edited"
+            CompletionText = '--remote-wait'
+            ToolTip        = "--remote-wait <files>`t$Remote and $Wait"
         }
         [PSCustomObject]@{
-            CompletionText = '--remote-wait-silent '
-            ToolTip        = "--remote-wait-silent <files>  Same as --remote-wait, but don't complain if there is no server"
+            CompletionText = '--remote-wait-silent'
+            ToolTip        = "--remote-wait-silent <files>`t$Remote, $Wait and $Silent"
         }
         [PSCustomObject]@{
-            CompletionText = '--remote-send '
+            CompletionText = '--remote-tab'
+            ToolTip        = "--remote-tab`t$Remote, $Tab"
+        }
+        [PSCustomObject]@{
+            CompletionText = '--remote-tab-silent'
+            ToolTip        = "--remote-tab-silent`t$Remote, $Tab, and $Silent"
+        }
+        [PSCustomObject]@{
+            CompletionText = '--remote-tab-wait'
+            ToolTip        = "--remote-tab-wait`t$Remote, $Tab, and $Wait"
+        }
+        [PSCustomObject]@{
+            CompletionText = '--remote-tab-wait-silent'
+            ToolTip        = "--remote-tab-wait-silent`t$Remote, $Tab, and $Wait, and $Silent"
+        }
+    )
+    $Argument += @(
+        [PSCustomObject]@{
+            CompletionText = '--remote-send'
             ToolTip        = "--remote-send <keys>`tSend <keys> to a Vim server and exit"
         }
         [PSCustomObject]@{
-            CompletionText = '--remote-tab '
-            ToolTip        = "--remote-tab`Same as --remote but open tab page for each file"
-        }
-        [PSCustomObject]@{
-            CompletionText = '--remote-tab-silent '
-            ToolTip        = "--remote-tab-silent`tSame as --remote-silent but open tab page for each file"
-        }
-        [PSCustomObject]@{
-            CompletionText = '--remote-tab-wait '
-            ToolTip        = "--remote-tab-wait`tSame as --remote-wait but open tab page for each file"
-        }
-        [PSCustomObject]@{
-            CompletionText = '--remote-tab-wait-silent '
-            ToolTip        = "--remote-tab-wait-silent`tSame as --remote-wait-silent but open tab page for each file"
-        }
-        [PSCustomObject]@{
-            CompletionText = '--remote-expr '
+            CompletionText = '--remote-expr'
             ToolTip        = "--remote-expr <expr>`tEvaluate <expr> in a Vim server and print result"
         }
         [PSCustomObject]@{
-            CompletionText = '--literal '
+            CompletionText = '--literal'
             ToolTip        = "--literal`tDon't expand wildcards"
         }
         [PSCustomObject]@{
@@ -289,7 +295,7 @@ function Get-VimOption {
             ToolTip        = "--serverlist`tList available Vim server names and exit"
         }
         [PSCustomObject]@{
-            CompletionText = '--servername '
+            CompletionText = '--servername'
             ToolTip        = "--servername <name>`tSend to/become the Vim server <name>. Tab to expand running server names"
         }
         [PSCustomObject]@{
