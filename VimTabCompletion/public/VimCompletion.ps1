@@ -60,39 +60,49 @@ function VimCompletion {
     )
 
     $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
+    # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
 
-    $AstExtent = $commandAst.Extent.Text.split()
 
-    if ($commandAst.CommandElements[-1..-2].Value -ceq '--servername') {
-        & vim --serverlist |
-        Where-Object { $_ -like "$wordToComplete*" } |
-        Sort-Object -Unique |
-        ForEach-Object {
-            $completionText = $_
-            $listItemText = $_
+    # TODO:  <19-07-20, jdfenw@gmail.com> Bug: repeated prompt one space after re-inserts same completion#
 
-            New-Object System.Management.Automation.CompletionResult `
-                $completionText, $listItemText, 'ParameterValue', $listItemText
+    # Are we next to a Parameter -, + or -- that should generate something other than files/directories?
+    # Cursor position may be at end of previous element if blank, so add 1.
+    $BeforeElement = $commandAst.CommandElements |
+    Where-Object { $_.Extent.EndColumnNumber -lt ($cursorPosition + 1) }
+
+    switch -Regex ($BeforeElement[-1].Extent.Text) {
+        '--servername' {
+            & vim --serverlist |
+            Where-Object { $_ -like "$wordToComplete*" } |
+            Sort-Object -Unique |
+            ForEach-Object {
+                $completionText = $_
+                $listItemText = $_
+
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, 'ParameterValue', $listItemText
+            }
+
+            return
         }
+        '^-r$|^-L$' {
+            Get-VimSwapFile |
+            Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
+            ForEach-Object -Process {
+                $completionText = $_.CompletionText
+                $listItemText = $_.ListItemText
+                $toolTip = $_.ToolTip
 
-        return
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, 'ProviderItem', $toolTip
+            }
 
-    } elseif ($AstExtent[-1..-2] -cmatch '^-r$|^-L$') {
-        Get-VimSwapFile |
-        Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
-        # Sort-Object -Property Argument -Unique -CaseSensitive |
-        ForEach-Object -Process {
-            $completionText = $_.CompletionText
-            $listItemText = $_.ListItemText
-            $toolTip = $_.ToolTip
+            return
 
-            New-Object System.Management.Automation.CompletionResult `
-                $completionText, $listItemText, 'ProviderItem', $toolTip
         }
-
-        return
-
     }
+
+    # Complete parameters starting with -|+ or default to Path completion.
     switch -Regex ($wordToComplete) {
         '^-|^\+' {
             Get-VimOption |
