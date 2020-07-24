@@ -59,18 +59,45 @@ function VimCompletion {
         $cursorPosition
     )
 
-    $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
+    # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
     # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
 
 
     # TODO:  <19-07-20, jdfenw@gmail.com> Bug: repeated prompt one space after re-inserts same completion#
 
-    # Are we next to a Parameter -, + or -- that should generate something other than files/directories?
-    # Cursor position may be at end of previous element if blank, so add 1.
-    $BeforeElement = $commandAst.CommandElements |
-    Where-Object { $_.Extent.EndColumnNumber -lt ($cursorPosition + 1) }
+    # mikebattista / PowerShell-WSL-Interop developed snippet to locate
+    # previousWord based on cursorPosition.
+    # https://github.com/mikebattista/PowerShell-WSL-Interop/blob/2dd31622200b12032febdff45fd9ef4bd69c15f9/WslInterop.psm1#L137
+    # $COMP_LINE = "`"$($commandAst.Extent.Text.PadRight($cursorPosition))`""
+    # $COMP_WORDS = $commandAst.CommandElements.Extent.Text
+    # $previousWord = $commandAst.CommandElements[0].Value
+    # $COMP_CWORD = 1
+    for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
+        $extent = $commandAst.CommandElements[$i].Extent
+        if ($cursorPosition -lt $extent.EndColumnNumber) {
+            # The cursor is in the middle of a word to complete.
+            $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
+            # $COMP_CWORD = $i
+            break
+        } elseif ($cursorPosition -eq $extent.EndColumnNumber) {
+            # The cursor is immediately after the current word.
+            $previousWord = $extent.Text
+            # $COMP_CWORD = $i + 1
+            break
+        } elseif ($cursorPosition -lt $extent.StartColumnNumber) {
+            # The cursor is within whitespace between the previous and current words.
+            $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
+            # $COMP_CWORD = $i
+            break
+        } elseif ($i -eq $commandAst.CommandElements.Count - 1 -and $cursorPosition -gt $extent.EndColumnNumber) {
+            # The cursor is within whitespace at the end of the line.
+            $previousWord = $extent.Text
+            # $COMP_CWORD = $i + 1
+            break
+        }
+    }
 
-    switch -Regex ($BeforeElement[-1].Extent.Text) {
+    switch -Regex ($previousWord) {
         '--servername' {
             & vim --serverlist |
             Where-Object { $_ -like "$wordToComplete*" } |
@@ -82,7 +109,6 @@ function VimCompletion {
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, 'ParameterValue', $listItemText
             }
-
             return
         }
         '^-r$|^-L$' {
@@ -111,6 +137,13 @@ function VimCompletion {
             ForEach-Object -Process {
                 $completionText = $_.CompletionText
                 $listItemText = $_.CompletionText
+
+                if ($null -ne $_.ResultType) {
+                    $resultType = $_.ResultType
+                } else {
+                    $resultType = 'Text'
+                }
+
                 $toolTip = $_.ToolTip
 
                 if ($completionText -eq $previousCompletionText) {
@@ -127,7 +160,7 @@ function VimCompletion {
                     }
                 }
                 New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'Text', $toolTip
+                    $completionText, $listItemText, $resultType, $toolTip
             }
         }
         Default { return }
