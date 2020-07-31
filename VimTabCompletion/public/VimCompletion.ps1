@@ -36,7 +36,21 @@
     --cmd                 -l                    --not-a-term          --remote-send         --servername          -w
     -d                    -L                    -o                    --remote-silent       --startuptime         -W
 
-    --                      Only file names after this
+    --                      Only file names after this (does not work with default installed Windows *vim*.bat files)
+
+.EXAMPLE
+    PS C:\> vim -V10'C:\ <Ctrl-Space>
+    -V10'C:\data'                 -V10'C:\SWSETUP'
+    -V10'C:\ESD'                  -V10'C:\Symbols'
+    -V10'C:\SymCache'             -V10'C:\inetpub'
+    -V10'C:\tools'
+    -V10'C:\Intel'                -V10'C:\Users'
+    -V10'C:\PerfLogs'             -V10'C:\Windows'
+    -V10'C:\Program Files'        -V10'C:\msdia80.dll'
+    -V10'C:\Program Files (x86)'
+
+    PowerShell interprets : as a switch and . as a property. Surround the file
+    name with single quotes, 'fname', to prevent this.
 
 .LINK
     https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced_parameters
@@ -61,7 +75,6 @@ function VimCompletion {
 
     # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
     # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
-
 
     # TODO:  <19-07-20, jdfenw@gmail.com> Bug: repeated prompt one space after re-inserts same completion#
 
@@ -124,12 +137,59 @@ function VimCompletion {
             }
 
             return
-
         }
     }
 
     # Complete parameters starting with -|+ or default to Path completion.
-    switch -Regex ($wordToComplete) {
+    switch -Regex -CaseSensitive ($wordToComplete) {
+        '^-V\d{1,2}' {
+            $toolTip = @(
+                    '-V[N][fname]`tBe verbose [level N]',
+                    "[log messages to fname]`n",
+                    'Always quote file path--e.g., ''C:\'' or ''tst.log'' '
+                    ) -join ' '
+
+            $VimOption = $Matches[0]
+            $FileToComplete = $wordToComplete.Substring($VimOption.Length)
+            $Parent = Get-Location
+
+            Get-ChildItem "$FileToComplete*" |
+            ForEach-Object -Process {
+
+                if ( $_.FullName.StartsWith($Parent) ) {
+                    $completionText = $_ | Resolve-Path -Relative
+                } else {
+                    $completionText = $_ | Resolve-Path
+                }
+
+                # Quote 'file path' to prevent PowerShell string and property
+                # expansion.  Otherwise file.log will pass to vim as
+                # `vim -V10file .log`
+                $completionText = "${VimOption}'${completionText}'"
+                $listItemText = $completionText
+                $resultType = 'ParameterName'
+
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, $resultType, $toolTip
+            }
+        }
+        '^-V' {
+            # -V[N]`tBe verbose [level N]
+            $VimOption = $Matches[0]
+            $OptionToComplete = $wordToComplete.Substring($VimOption.Length)
+
+            Get-VimVerbose |
+            Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
+            Sort-Object -Property CompletionText -Unique |
+            ForEach-Object -Process {
+                $completionText = "${VimOption}$($_.CompletionText)"
+                $listItemText = $completionText
+                $toolTip = $_.ToolTip
+
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, 'ParameterName', $toolTip
+            }
+        }
         '^-|^\+' {
             Get-VimOption |
             Where-Object { $_.CompletionText -clike "$wordToComplete*" } |

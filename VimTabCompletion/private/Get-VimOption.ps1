@@ -21,8 +21,6 @@
         ExcludeArgument = '-v|-E|-d|-y'
     }
 .NOTES
-    CompletionText should end with a space to allow default file completion or
-    subcommand expansion.
 
     function Get-VimOption {
 
@@ -83,9 +81,14 @@ function Get-VimOption {
             CompletionText = '-l'
             ToolTip        = "-l`tLisp mode"
         }
+        $ToolTip = @(
+            "-V[N][fname]`tBe verbose [level N] (default: 10)",
+            "[log messages to fname]`n",
+            "When bigger than zero, Vim will give messages about what it is doing."
+        ) -join ' '
         [PSCustomObject]@{
             CompletionText = '-V'
-            ToolTip        = "-V[N][fname]`tBe verbose [level N] [log messages to fname]"
+            ToolTip        = $ToolTip
         }
         [PSCustomObject]@{
             CompletionText = '-D'
