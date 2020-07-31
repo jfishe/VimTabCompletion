@@ -24,7 +24,7 @@
     CompletionText should end with a space to allow default file completion or
     subcommand expansion.
 
-    function Get-VimArguments {
+    function Get-VimOption {
 
         if (Get-Command -Name vim -ErrorAction SilentlyContinue) {
             $VimArguments = & vim --help | Select-String -Pattern '^\s*[-+]'
