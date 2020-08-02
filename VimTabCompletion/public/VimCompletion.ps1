@@ -4,7 +4,7 @@
 
 .DESCRIPTION
      Provide completion for vim, vimdiff, gvim, gvimdiff, and evim similar to
-    /usr/share/zsh/functions/Completion/Unix/_vim in zsh.
+     zsh. See LINK for `compdef vim`.
 
 .PARAMETER wordToComplete
     This parameter is set to value the user has provided before they pressed
@@ -57,6 +57,8 @@
 
 .LINK
     https://docs.microsoft.com/en-us/dotnet/api/system.management.automation.language.ast
+.LINK
+    https://sourceforge.net/p/zsh/code/ci/master/tree/Completion/Unix/Command/_vim
 #>
 
 function VimCompletion {
@@ -76,7 +78,7 @@ function VimCompletion {
     # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
     # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
 
-    # TODO:  <19-07-20, jdfenw@gmail.com> Bug: repeated prompt one space after re-inserts same completion#
+    $Command = $commandAst.CommandElements[0].Extent.Text
 
     # mikebattista / PowerShell-WSL-Interop developed snippet to locate
     # previousWord based on cursorPosition.
@@ -110,7 +112,7 @@ function VimCompletion {
         }
     }
 
-    switch -Regex ($previousWord) {
+    switch -Regex -CaseSensitive ($previousWord) {
         '--servername' {
             & vim --serverlist |
             Where-Object { $_ -like "$wordToComplete*" } |
@@ -138,16 +140,106 @@ function VimCompletion {
 
             return
         }
+        '^-u|^-U' {
+            $ToolTip = 'Skip initialization from files and environment variables'
+            # Doesn't appear to work on Windows. Still sources vimrc.
+            # Doesn't source gvimrc.
+            $Argument = @(
+                [PSCustomObject]@{
+                    CompletionText = 'NONE'
+                    ToolTip        = $ToolTip
+                    ResultType     = 'ParameterValue'
+                }
+                [PSCustomObject]@{
+                    CompletionText = 'NORC'
+                    ToolTip        = "${ToolTip}, but load plugins"
+                    ResultType     = 'ParameterValue'
+                }
+            )
+            if ($Matches[0] -ceq '-u') {
+                # gvim only supports -U NONE to skip GUI initialization.
+                $Argument += @(
+                    [PSCustomObject]@{
+                        CompletionText = 'DEFAULTS'
+                        ToolTip        = "${ToolTip}, but loads defaults.vim"
+                        ResultType     = 'ParameterValue'
+                    }
+                )
+            }
+
+            $Argument |
+            Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
+            Sort-Object -Property CompletionText -Unique -CaseSensitive |
+            ForEach-Object -Process {
+                $completionText = $_.CompletionText
+                $listItemText = $_.CompletionText
+
+                if ($null -ne $_.ResultType) {
+                    $resultType = $_.ResultType
+                } else {
+                    $resultType = 'Text'
+                }
+
+                $toolTip = $_.ToolTip
+
+                if ($completionText -eq $previousCompletionText) {
+                    # Differentiate completions that differ only by case
+                    # otherwise PowerShell will view them as duplicate.
+                    $listItemText += ' '
+                }
+                $previousCompletionText = $completionText
+
+                if ($_.ExcludeArgument) {
+                    $excludePattern = [Regex]::new($_.ExcludeArgument)
+                    if ($excludePattern.IsMatch($commandAst.Parent)) {
+                        return
+                    }
+                }
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, $resultType, $toolTip
+            }
+
+            # Complete [g]vimrc files.
+            if ($Matches[0] -ceq '-u') {
+                $toolTip = "-u <vimrc>`tUse <vimrc> instead of any .vimrc"
+            } else {
+                $toolTip = "-U <gvimrc>`tUse <gvimrc> instead of any .gvimrc"
+            }
+
+            $FileToComplete = $wordToComplete
+            $Parent = Get-Location
+
+            Get-ChildItem "$FileToComplete*" |
+            ForEach-Object -Process {
+
+                if ( $_.FullName.StartsWith($Parent) ) {
+                    $completionText = $_ | Resolve-Path -Relative
+                } else {
+                    $completionText = $_ | Resolve-Path
+                }
+
+                $listItemText = $completionText
+
+                if ($_.PSIsContainer) {
+                    $resultType = 'ProviderContainer'
+                } else {
+                    $resultType = 'ProviderItem'
+                }
+
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, $resultType, $toolTip
+            }
+        }
     }
 
     # Complete parameters starting with -|+ or default to Path completion.
     switch -Regex -CaseSensitive ($wordToComplete) {
         '^-V\d{1,2}' {
             $toolTip = @(
-                    '-V[N][fname]`tBe verbose [level N]',
-                    "[log messages to fname]`n",
-                    'Always quote file path--e.g., ''C:\'' or ''tst.log'' '
-                    ) -join ' '
+                '-V[N][fname]`tBe verbose [level N]',
+                "[log messages to fname]`n",
+                'Always quote file path--e.g., ''C:\'' or ''tst.log'' '
+            ) -join ' '
 
             $VimOption = $Matches[0]
             $FileToComplete = $wordToComplete.Substring($VimOption.Length)
@@ -167,7 +259,12 @@ function VimCompletion {
                 # `vim -V10file .log`
                 $completionText = "${VimOption}'${completionText}'"
                 $listItemText = $completionText
-                $resultType = 'ParameterName'
+
+                if ($_.PSIsContainer) {
+                    $resultType = 'ProviderContainer'
+                } else {
+                    $resultType = 'ProviderItem'
+                }
 
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, $resultType, $toolTip
