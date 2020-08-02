@@ -123,7 +123,7 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-u'
-            ToolTip        = "-u <vimrc>`tUse <vimrc> instead of any .vimrc:config:->config"
+            ToolTip        = "-u <vimrc>`tUse <vimrc> instead of any .vimrc"
         }
         [PSCustomObject]@{
             CompletionText = '--noplugin'
@@ -242,6 +242,40 @@ function Get-VimOption {
             ToolTip        = "-x`tEdit encrypted files"
         }
     )
+
+    # gvim GUI parameters
+    $Argument += @(
+        # Not supported on Windows. Use gvim
+        # [PSCustomObject]@{
+        #     CompletionText = '-g'
+        #     ToolTip        = "-g`tRun using GUI (like ""gvim"")"
+        # }
+        [PSCustomObject]@{
+            CompletionText = '-f'
+            ToolTip        = "-f`tForeground: Don't fork when starting GUI"
+        }
+        [PSCustomObject]@{
+            CompletionText = '--nofork'
+            ToolTip        = "--nofork`tForeground: Don't fork when starting GUI"
+        }
+        [PSCustomObject]@{
+            CompletionText = '-U'
+            ToolTip        = "-U <gvimrc>`tUse <gvimrc> instead of any .gvimrc"
+        }
+
+        # Windows specific GUI options
+        if ($PSVersionTable.Platform -eq 'Win32NT') {
+            [PSCustomObject]@{
+                CompletionText = '-P'
+                ToolTip        = "-P <parent title>`tOpen Vim inside parent application"
+            }
+            [PSCustomObject]@{
+                CompletionText = '--windowid'
+                ToolTip        = "--windowid <HWND> Open Vim inside another win32 widget"
+            }
+        }
+    )
+
     $Remote = 'Edit <files> in a Vim server if possible'
     $Silent = 'don''t complain if there is no server'
     $Wait = 'wait for files to have been edited'
