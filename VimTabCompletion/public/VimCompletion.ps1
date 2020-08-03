@@ -63,6 +63,7 @@
 
 function VimCompletion {
     [CmdletBinding()]
+    [OutputType([System.Management.Automation.CompletionResult[]])]
     param(
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
@@ -78,7 +79,7 @@ function VimCompletion {
     # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
     # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
 
-    $Command = $commandAst.CommandElements[0].Extent.Text
+    # $Command = $commandAst.CommandElements[0].Extent.Text
 
     # mikebattista / PowerShell-WSL-Interop developed snippet to locate
     # previousWord based on cursorPosition.
@@ -206,25 +207,12 @@ function VimCompletion {
                 $toolTip = "-U <gvimrc>`tUse <gvimrc> instead of any .gvimrc"
             }
 
-            $FileToComplete = $wordToComplete
-            $Parent = Get-Location
-
-            Get-ChildItem "$FileToComplete*" |
+            Get-VimChildItem -Path "$wordToComplete*" -ToolTip $toolTip |
             ForEach-Object -Process {
-
-                if ( $_.FullName.StartsWith($Parent) ) {
-                    $completionText = $_ | Resolve-Path -Relative
-                } else {
-                    $completionText = $_ | Resolve-Path
-                }
-
-                $listItemText = $completionText
-
-                if ($_.PSIsContainer) {
-                    $resultType = 'ProviderContainer'
-                } else {
-                    $resultType = 'ProviderItem'
-                }
+                $completionText = $_.CompletionText
+                $listItemText = $_.ListItemText
+                $resultType = $_.ResultType
+                $toolTip = $_.ToolTip
 
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, $resultType, $toolTip
@@ -243,28 +231,34 @@ function VimCompletion {
 
             $VimOption = $Matches[0]
             $FileToComplete = $wordToComplete.Substring($VimOption.Length)
-            $Parent = Get-Location
 
-            Get-ChildItem "$FileToComplete*" |
+            Get-VimChildItem -Path "$FileToComplete*" -VimOption $VimOption -Quote -ToolTip $toolTip |
             ForEach-Object -Process {
+                $completionText = $_.CompletionText
+                $listItemText = $_.ListItemText
+                $resultType = $_.ResultType
 
-                if ( $_.FullName.StartsWith($Parent) ) {
-                    $completionText = $_ | Resolve-Path -Relative
-                } else {
-                    $completionText = $_ | Resolve-Path
-                }
+                $toolTip = $_.ToolTip
+            # Get-ChildItem "$FileToComplete*" |
+            # ForEach-Object -Process {
 
-                # Quote 'file path' to prevent PowerShell string and property
-                # expansion.  Otherwise file.log will pass to vim as
-                # `vim -V10file .log`
-                $completionText = "${VimOption}'${completionText}'"
-                $listItemText = $completionText
+            #     if ( $_.FullName.StartsWith($Parent) ) {
+            #         $completionText = $_ | Resolve-Path -Relative
+            #     } else {
+            #         $completionText = $_ | Resolve-Path
+            #     }
 
-                if ($_.PSIsContainer) {
-                    $resultType = 'ProviderContainer'
-                } else {
-                    $resultType = 'ProviderItem'
-                }
+            #     # Quote 'file path' to prevent PowerShell string and property
+            #     # expansion.  Otherwise file.log will pass to vim as
+            #     # `vim -V10file .log`
+            #     $completionText = "${VimOption}'${completionText}'"
+            #     $listItemText = $completionText
+
+            #     if ($_.PSIsContainer) {
+            #         $resultType = 'ProviderContainer'
+            #     } else {
+            #         $resultType = 'ProviderItem'
+            #     }
 
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, $resultType, $toolTip
