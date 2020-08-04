@@ -227,6 +227,13 @@ function VimCompletion {
             Where-Object { $_.CompletionText -clike $Matches[0] }
             $toolTip = $Argument.ToolTip
 
+            1..4 | ForEach-Object -Process {
+                $completionText = "$($Matches[0])$_"
+                $listItemText = $completionText
+                New-Object System.Management.Automation.CompletionResult `
+                    $completionText, $listItemText, $resultType, $toolTip
+            }
+
         }
         '^-V\d{1,2}' {
             $Argument = Get-VimOption |
@@ -242,28 +249,7 @@ function VimCompletion {
                 $completionText = $_.CompletionText
                 $listItemText = $_.ListItemText
                 $resultType = $_.ResultType
-
                 $toolTip = $_.ToolTip
-                # Get-ChildItem "$FileToComplete*" |
-                # ForEach-Object -Process {
-
-                #     if ( $_.FullName.StartsWith($Parent) ) {
-                #         $completionText = $_ | Resolve-Path -Relative
-                #     } else {
-                #         $completionText = $_ | Resolve-Path
-                #     }
-
-                #     # Quote 'file path' to prevent PowerShell string and property
-                #     # expansion.  Otherwise file.log will pass to vim as
-                #     # `vim -V10file .log`
-                #     $completionText = "${VimOption}'${completionText}'"
-                #     $listItemText = $completionText
-
-                #     if ($_.PSIsContainer) {
-                #         $resultType = 'ProviderContainer'
-                #     } else {
-                #         $resultType = 'ProviderItem'
-                #     }
 
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, $resultType, $toolTip

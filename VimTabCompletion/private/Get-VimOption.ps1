@@ -133,15 +133,15 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-o'
-            ToolTip        = "-o[N]`tOpen N windows (default: one for each file)::window count: "
+            ToolTip        = "-o[N]`tOpen N windows (default: one for each file)"
         }
         [PSCustomObject]@{
             CompletionText = '-O'
-            ToolTip        = "-O[N]`tOpen N windows split vertically (default: one for each file)::window count: "
+            ToolTip        = "-O[N]`tOpen N windows split vertically (default: one for each file)"
         }
         [PSCustomObject]@{
             CompletionText = '-p'
-            ToolTip        = "-p[N]`tOpen N tab pages (default: one for each file)::tab count: "
+            ToolTip        = "-p[N]`tOpen N tab pages (default: one for each file)"
         }
         [PSCustomObject]@{
             CompletionText = '-q'
