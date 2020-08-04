@@ -127,7 +127,7 @@ function VimCompletion {
             }
             return
         }
-        '^-r$|^-L$' {
+        '^-[rL]$' {
             Get-VimSwapFile |
             Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
             ForEach-Object -Process {
@@ -141,7 +141,7 @@ function VimCompletion {
 
             return
         }
-        '^-u|^-U' {
+        '^-[uU]$' {
             $ToolTip = 'Skip initialization from files and environment variables'
             # Doesn't appear to work on Windows. Still sources vimrc.
             # Doesn't source gvimrc.
@@ -162,7 +162,7 @@ function VimCompletion {
                 $Argument += @(
                     [PSCustomObject]@{
                         CompletionText = 'DEFAULTS'
-                        ToolTip        = "${ToolTip}, but loads defaults.vim"
+                        ToolTip        = "${ToolTip}, but load defaults.vim"
                         ResultType     = 'ParameterValue'
                     }
                 )
@@ -201,11 +201,9 @@ function VimCompletion {
             }
 
             # Complete [g]vimrc files.
-            if ($Matches[0] -ceq '-u') {
-                $toolTip = "-u <vimrc>`tUse <vimrc> instead of any .vimrc"
-            } else {
-                $toolTip = "-U <gvimrc>`tUse <gvimrc> instead of any .gvimrc"
-            }
+            $Argument = Get-VimOption |
+            Where-Object { $_.CompletionText -clike $Matches[0] }
+            $toolTip = $Argument.ToolTip
 
             Get-VimChildItem -Path "$wordToComplete*" -ToolTip $toolTip |
             ForEach-Object -Process {
@@ -222,12 +220,19 @@ function VimCompletion {
 
     # Complete parameters starting with -|+ or default to Path completion.
     switch -Regex -CaseSensitive ($wordToComplete) {
+        '^-[oOp]$' {
+            $resultType = 'ParameterName'
+
+            $Argument = Get-VimOption |
+            Where-Object { $_.CompletionText -clike $Matches[0] }
+            $toolTip = $Argument.ToolTip
+
+        }
         '^-V\d{1,2}' {
-            $toolTip = @(
-                '-V[N][fname]`tBe verbose [level N]',
-                "[log messages to fname]`n",
-                'Always quote file path--e.g., ''C:\'' or ''tst.log'' '
-            ) -join ' '
+            $Argument = Get-VimOption |
+            Where-Object { $_.CompletionText -clike '-V' }
+            $toolTip = $Argument.ToolTip
+            $toolTip += "`n Always quote [fname]--e.g., 'C:\' or 'tst.log'"
 
             $VimOption = $Matches[0]
             $FileToComplete = $wordToComplete.Substring($VimOption.Length)
@@ -239,26 +244,26 @@ function VimCompletion {
                 $resultType = $_.ResultType
 
                 $toolTip = $_.ToolTip
-            # Get-ChildItem "$FileToComplete*" |
-            # ForEach-Object -Process {
+                # Get-ChildItem "$FileToComplete*" |
+                # ForEach-Object -Process {
 
-            #     if ( $_.FullName.StartsWith($Parent) ) {
-            #         $completionText = $_ | Resolve-Path -Relative
-            #     } else {
-            #         $completionText = $_ | Resolve-Path
-            #     }
+                #     if ( $_.FullName.StartsWith($Parent) ) {
+                #         $completionText = $_ | Resolve-Path -Relative
+                #     } else {
+                #         $completionText = $_ | Resolve-Path
+                #     }
 
-            #     # Quote 'file path' to prevent PowerShell string and property
-            #     # expansion.  Otherwise file.log will pass to vim as
-            #     # `vim -V10file .log`
-            #     $completionText = "${VimOption}'${completionText}'"
-            #     $listItemText = $completionText
+                #     # Quote 'file path' to prevent PowerShell string and property
+                #     # expansion.  Otherwise file.log will pass to vim as
+                #     # `vim -V10file .log`
+                #     $completionText = "${VimOption}'${completionText}'"
+                #     $listItemText = $completionText
 
-            #     if ($_.PSIsContainer) {
-            #         $resultType = 'ProviderContainer'
-            #     } else {
-            #         $resultType = 'ProviderItem'
-            #     }
+                #     if ($_.PSIsContainer) {
+                #         $resultType = 'ProviderContainer'
+                #     } else {
+                #         $resultType = 'ProviderItem'
+                #     }
 
                 New-Object System.Management.Automation.CompletionResult `
                     $completionText, $listItemText, $resultType, $toolTip

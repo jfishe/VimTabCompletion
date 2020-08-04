@@ -81,6 +81,7 @@ function Get-VimOption {
             CompletionText = '-l'
             ToolTip        = "-l`tLisp mode"
         }
+
         $ToolTip = @(
             "-V[N][fname]`tBe verbose [level N] (default: 10)",
             "[log messages to fname]`n",
@@ -90,6 +91,7 @@ function Get-VimOption {
             CompletionText = '-V'
             ToolTip        = $ToolTip
         }
+
         [PSCustomObject]@{
             CompletionText = '-D'
             ToolTip        = "-D`tDebugging mode"

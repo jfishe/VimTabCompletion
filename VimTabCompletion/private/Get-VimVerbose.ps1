@@ -41,11 +41,11 @@
 function Get-VimVerbose {
     param ()
 
-    $ToolTip = @(
-            "-V[N][fname]`tBe verbose [level N] (default: 10)",
-            "[log messages to fname]`n",
-            "When bigger than zero, Vim will give messages about what it is doing.`n "
-            ) -join ' '
+            $Argument = Get-VimOption |
+            Where-Object { $_.CompletionText -clike '-V' }
+            $ToolTip = $Argument.ToolTip
+            $ToolTip += "`n "
+
     $Argument = @(
         [PSCustomObject]@{
             CompletionText = 0
