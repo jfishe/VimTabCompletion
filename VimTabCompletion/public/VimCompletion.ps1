@@ -143,18 +143,16 @@ function VimCompletion {
         }
         '^-[uU]$' {
             $ToolTip = 'Skip initialization from files and environment variables'
-            # Doesn't appear to work on Windows. Still sources vimrc.
-            # Doesn't source gvimrc.
             $Argument = @(
+                # Doesn't appear to work on Windows. Still sources vimrc.
+                # However, either correclty doesn't source gvimrc.
                 [PSCustomObject]@{
                     CompletionText = 'NONE'
                     ToolTip        = $ToolTip
-                    ResultType     = 'ParameterValue'
                 }
                 [PSCustomObject]@{
                     CompletionText = 'NORC'
                     ToolTip        = "${ToolTip}, but load plugins"
-                    ResultType     = 'ParameterValue'
                 }
             )
             if ($Matches[0] -ceq '-u') {
@@ -163,7 +161,6 @@ function VimCompletion {
                     [PSCustomObject]@{
                         CompletionText = 'DEFAULTS'
                         ToolTip        = "${ToolTip}, but load defaults.vim"
-                        ResultType     = 'ParameterValue'
                     }
                 )
             }
@@ -171,34 +168,7 @@ function VimCompletion {
             $Argument |
             Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            ForEach-Object -Process {
-                $completionText = $_.CompletionText
-                $listItemText = $_.CompletionText
-
-                if ($null -ne $_.ResultType) {
-                    $resultType = $_.ResultType
-                } else {
-                    $resultType = 'Text'
-                }
-
-                $toolTip = $_.ToolTip
-
-                if ($completionText -eq $previousCompletionText) {
-                    # Differentiate completions that differ only by case
-                    # otherwise PowerShell will view them as duplicate.
-                    $listItemText += ' '
-                }
-                $previousCompletionText = $completionText
-
-                if ($_.ExcludeArgument) {
-                    $excludePattern = [Regex]::new($_.ExcludeArgument)
-                    if ($excludePattern.IsMatch($commandAst.Parent)) {
-                        return
-                    }
-                }
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, $resultType, $toolTip
-            }
+            New-TabItem -ResultType 'ParameterValue' -CommandAst $commandAst
 
             # Complete [g]vimrc files.
             $Argument = Get-VimOption |
@@ -206,15 +176,7 @@ function VimCompletion {
             $toolTip = $Argument.ToolTip
 
             Get-VimChildItem -Path "$wordToComplete*" -ToolTip $toolTip |
-            ForEach-Object -Process {
-                $completionText = $_.CompletionText
-                $listItemText = $_.ListItemText
-                $resultType = $_.ResultType
-                $toolTip = $_.ToolTip
-
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, $resultType, $toolTip
-            }
+            New-TabItem -CommandAst $commandAst
         }
     }
 
@@ -235,6 +197,16 @@ function VimCompletion {
             }
 
         }
+        '^-V' {
+            # -V[N]`tBe verbose [level N]
+            $VimOption = $Matches[0]
+            $OptionToComplete = $wordToComplete.Substring($VimOption.Length)
+
+            Get-VimVerbose |
+            Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
+            Sort-Object -Property CompletionText -Unique |
+            New-TabItem -ResultType 'ParameterName' -CommandAst $commandAst -VimOption "${VimOption}"
+        }
         '^-V\d{1,2}' {
             $Argument = Get-VimOption |
             Where-Object { $_.CompletionText -clike '-V' }
@@ -244,66 +216,14 @@ function VimCompletion {
             $VimOption = $Matches[0]
             $FileToComplete = $wordToComplete.Substring($VimOption.Length)
 
-            Get-VimChildItem -Path "$FileToComplete*" -VimOption $VimOption -Quote -ToolTip $toolTip |
-            ForEach-Object -Process {
-                $completionText = $_.CompletionText
-                $listItemText = $_.ListItemText
-                $resultType = $_.ResultType
-                $toolTip = $_.ToolTip
-
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, $resultType, $toolTip
-            }
-        }
-        '^-V' {
-            # -V[N]`tBe verbose [level N]
-            $VimOption = $Matches[0]
-            $OptionToComplete = $wordToComplete.Substring($VimOption.Length)
-
-            Get-VimVerbose |
-            Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
-            Sort-Object -Property CompletionText -Unique |
-            ForEach-Object -Process {
-                $completionText = "${VimOption}$($_.CompletionText)"
-                $listItemText = $completionText
-                $toolTip = $_.ToolTip
-
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'ParameterName', $toolTip
-            }
+            Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $toolTip |
+            New-TabItem -CommandAst $commandAst -VimOption "${VimOption}"
         }
         '^-|^\+' {
             Get-VimOption |
             Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            ForEach-Object -Process {
-                $completionText = $_.CompletionText
-                $listItemText = $_.CompletionText
-
-                if ($null -ne $_.ResultType) {
-                    $resultType = $_.ResultType
-                } else {
-                    $resultType = 'Text'
-                }
-
-                $toolTip = $_.ToolTip
-
-                if ($completionText -eq $previousCompletionText) {
-                    # Differentiate completions that differ only by case
-                    # otherwise PowerShell will view them as duplicate.
-                    $listItemText += ' '
-                }
-                $previousCompletionText = $completionText
-
-                if ($_.ExcludeArgument) {
-                    $excludePattern = [Regex]::new($_.ExcludeArgument)
-                    if ($excludePattern.IsMatch($commandAst.Parent)) {
-                        return
-                    }
-                }
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, $resultType, $toolTip
-            }
+            New-TabItem -ResultType 'ParameterName' -CommandAst $commandAst
         }
         Default { return }
     }

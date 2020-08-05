@@ -6,9 +6,6 @@
 .PARAMETER Path
     Specifies a path to one location. Wildcards are accepted. The default
     location is the current directory (`.`).
-.PARAMETER VimOption
-    A Vim ParameterName that includes a file, e.g., `-V10'startup.log`.
-    Defaults to empty string for ParameterValue , e.g., `-U .gvimrc`.
 .PARAMETER Quote
     A switch to enable quoting of a file path, e.g.,
     `-V10'C:\Users\startup.log`.
@@ -34,17 +31,13 @@ function Get-VimChildItem {
     param (
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
-        $Path,
-
+        $Path
+        ,
         [Parameter(Mandatory = $false, Position = 1)]
-        [string]
-        $VimOption = '',
-
-        [Parameter(Mandatory = $false, Position = 2)]
         [switch]
-        $Quote = $false,
-
-        [Parameter(Mandatory = $false, Position = 3)]
+        $Quote = $false
+        ,
+        [Parameter(Mandatory = $false, Position = 2)]
         [string]
         $ToolTip = $null
     )
@@ -67,11 +60,10 @@ function Get-VimChildItem {
             # expansion.  Otherwise file.log will pass to vim as
             # `vim -V10file .log`
             if ($Quote -or "$completionText" -match '\s') {
-                $completionText = "${VimOption}'${completionText}'"
+                $completionText = "'${completionText}'"
             } else {
-                $completionText = "${VimOption}${completionText}"
+                $completionText = "${completionText}"
             }
-            $listItemText = $completionText
 
             if ($_.PSIsContainer) {
                 $resultType = 'ProviderContainer'
@@ -87,7 +79,6 @@ function Get-VimChildItem {
 
             [PSCustomObject]@{
                 CompletionText = $completionText
-                ListItemText   = $listItemText
                 ResultType     = $resultType
                 ToolTip        = $toolTip
             }
