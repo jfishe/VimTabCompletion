@@ -6,11 +6,11 @@
      Provide completion for vim, vimdiff, gvim, gvimdiff, and evim similar to
      zsh. See LINK for `compdef vim`.
 
-.PARAMETER wordToComplete
+.PARAMETER WordToComplete
     This parameter is set to value the user has provided before they pressed
     Tab. Used to determine tab completion values.
 
-.PARAMETER commandAst
+.PARAMETER CommandAst
     This parameter is set to the Abstract Syntax Tree (AST) for the current
     input line.
 
@@ -21,7 +21,7 @@
     Extent             : vim --remote -
     Parent             : vim --remote -
 
-.PARAMETER cursorPosition
+.PARAMETER CursorPosition
     This parameter is set to the position of the cursor when the user pressed
     Tab.
 
@@ -67,72 +67,97 @@ function VimCompletion {
     param(
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
-        $wordToComplete,
+        $WordToComplete,
         [Parameter(Mandatory = $true, Position = 1)]
         [System.Management.Automation.Language.CommandAst]
-        $commandAst,
+        $CommandAst,
         [Parameter(Mandatory = $true, Position = 2)]
         [Int32]
-        $cursorPosition
+        $CursorPosition
     )
 
-    # $global:dude = @("$wordToComplete", $commandAst, $cursorPosition)
-    # $global:dude = [System.Management.Automation.Language.CommandAst] $commandAst
-
-    # $Command = $commandAst.CommandElements[0].Extent.Text
+    # $global:dude = @("$WordToComplete", $CommandAst, $CursorPosition)
+    # $global:dude = [System.Management.Automation.Language.CommandAst] $CommandAst
 
     # mikebattista / PowerShell-WSL-Interop developed snippet to locate
-    # previousWord based on cursorPosition.
+    # PreviousWord based on CursorPosition.
     # https://github.com/mikebattista/PowerShell-WSL-Interop/blob/2dd31622200b12032febdff45fd9ef4bd69c15f9/WslInterop.psm1#L137
-    # $COMP_LINE = "`"$($commandAst.Extent.Text.PadRight($cursorPosition))`""
-    # $COMP_WORDS = $commandAst.CommandElements.Extent.Text
-    # $previousWord = $commandAst.CommandElements[0].Value
-    # $COMP_CWORD = 1
-    for ($i = 1; $i -lt $commandAst.CommandElements.Count; $i++) {
-        $extent = $commandAst.CommandElements[$i].Extent
-        if ($cursorPosition -lt $extent.EndColumnNumber) {
+    for ($i = 1; $i -lt $CommandAst.CommandElements.Count; $i++) {
+        $Extent = $CommandAst.CommandElements[$i].Extent
+        if ($CursorPosition -lt $Extent.EndColumnNumber) {
             # The cursor is in the middle of a word to complete.
-            $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
-            # $COMP_CWORD = $i
+            $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
             break
-        } elseif ($cursorPosition -eq $extent.EndColumnNumber) {
+        } elseif ($CursorPosition -eq $Extent.EndColumnNumber) {
             # The cursor is immediately after the current word.
-            $previousWord = $extent.Text
-            # $COMP_CWORD = $i + 1
+            $PreviousWord = $Extent.Text
             break
-        } elseif ($cursorPosition -lt $extent.StartColumnNumber) {
+        } elseif ($CursorPosition -lt $Extent.StartColumnNumber) {
             # The cursor is within whitespace between the previous and current words.
-            $previousWord = $commandAst.CommandElements[$i - 1].Extent.Text
-            # $COMP_CWORD = $i
+            $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
             break
-        } elseif ($i -eq $commandAst.CommandElements.Count - 1 -and $cursorPosition -gt $extent.EndColumnNumber) {
+        } elseif ($i -eq $CommandAst.CommandElements.Count - 1 -and $CursorPosition -gt $Extent.EndColumnNumber) {
             # The cursor is within whitespace at the end of the line.
-            $previousWord = $extent.Text
-            # $COMP_CWORD = $i + 1
+            $PreviousWord = $Extent.Text
             break
         }
     }
 
-    switch -Regex -CaseSensitive ($previousWord) {
+    switch -Regex -CaseSensitive ($PreviousWord) {
         '--servername' {
             & vim --serverlist |
-            Where-Object { $_ -like "$wordToComplete*" } |
+            Where-Object { $_ -like "$WordToComplete*" } |
             Sort-Object -Unique |
             ForEach-Object {
-                $completionText = $_
-                $listItemText = $_
+                $CompletionText = $_
+                $ListItemText = $_
 
                 New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'ParameterValue', $listItemText
+                    $CompletionText, $ListItemText, 'ParameterValue', $ListItemText
             }
             return
         }
         '^-[rL]$' {
             Get-VimSwapFile |
-            Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
-            New-TabItem -CommandAst $commandAst -ResultType 'ProviderItem' `
+            Where-Object { $_.CompletionText -like "*$WordToComplete*" } |
+            New-TabItem -CommandAst $CommandAst -ResultType 'ProviderItem' `
 
             return
+        }
+        '^-T$' {
+            if ($PSVersionTable.Platform -eq 'Win32NT') {
+                $Argument = Get-VimOption |
+                Where-Object { $_.CompletionText -clike $Matches[0] }
+                $ToolTip = $Argument.ToolTip
+                $ToolTip += " (default: win32)"
+
+                $Terminal = `
+                    & { vim --not-a-term --cmd ':set term=* | :qa!' } 2>&1 |
+                ForEach-Object -Process { $_.ToString() } |
+                Where-Object { $_ -ne
+                    'System.Management.Automation.RemoteException' }
+
+                $Terminal = $Terminal |
+                Select-String -NoEmphasis -Pattern '^\s' |
+                Where-Object { $_.Line.Trim() -like "$WordToComplete*" } |
+                ForEach-Object -Process {
+                    [PSCustomObject] @{
+                        CompletionText = $_.Line.Trim()
+                    }
+                }
+
+                $Terminal |
+                New-TabItem -CommandAst $CommandAst `
+                    -ResultType 'ParameterValue' -ToolTip $ToolTip
+
+                return
+            } else {
+                # Not Implemented
+                # desc=( $TERMINFO ~/.terminfo $TERMINFO_DIRS /usr/{,share/}{,lib/}terminfo /{etc,lib}/terminfo )
+                # _wanted terminals expl 'terminal name' \
+                #     compadd "$@" - $desc/*/*(N:t)
+                return $null
+            }
         }
         '^-[uU]$' {
             $ToolTip = 'Skip initialization from files and environment variables'
@@ -159,66 +184,67 @@ function VimCompletion {
             }
 
             $Argument |
-            Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
+            Where-Object { $_.CompletionText -clike "$WordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            New-TabItem -ResultType 'ParameterValue' -CommandAst $commandAst
+            New-TabItem -ResultType 'ParameterValue' -CommandAst $CommandAst
 
             # Complete [g]vimrc files.
             $Argument = Get-VimOption |
             Where-Object { $_.CompletionText -clike $Matches[0] }
-            $toolTip = $Argument.ToolTip
+            $ToolTip = $Argument.ToolTip
 
-            Get-VimChildItem -Path "$wordToComplete*" -ToolTip $toolTip |
-            New-TabItem -CommandAst $commandAst
+            Get-VimChildItem -Path "$WordToComplete*" -ToolTip $ToolTip |
+            New-TabItem -CommandAst $CommandAst
 
             return
         }
     }
 
     # Complete parameters starting with -|+ or default to Path completion.
-    switch -Regex -CaseSensitive ($wordToComplete) {
+    switch -Regex -CaseSensitive ($WordToComplete) {
         '^-[oOp]$' {
-            $resultType = 'ParameterName'
+            $ResultType = 'ParameterName'
 
             $Argument = Get-VimOption |
             Where-Object { $_.CompletionText -clike $Matches[0] }
-            $toolTip = $Argument.ToolTip
+            $ToolTip = $Argument.ToolTip
 
             1..4 | ForEach-Object -Process {
-                $completionText = "$($Matches[0])$_"
-                $listItemText = $completionText
+                $CompletionText = "$($Matches[0])$_"
+                $ListItemText = $CompletionText
                 New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, $resultType, $toolTip
+                    $CompletionText, $ListItemText, $ResultType, $ToolTip
             }
 
         }
         '^-V' {
-            # -V[N]`tBe verbose [level N]
+            # -V[N] Be verbose [level N]
             $VimOption = $Matches[0]
-            $OptionToComplete = $wordToComplete.Substring($VimOption.Length)
+            $OptionToComplete = $WordToComplete.Substring($VimOption.Length)
 
             Get-VimVerbose |
             Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
             Sort-Object -Property CompletionText -Unique |
-            New-TabItem -ResultType 'ParameterName' -CommandAst $commandAst -VimOption "${VimOption}"
+            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst -VimOption "${VimOption}"
         }
         '^-V\d{1,2}' {
+            # -V[N][fname] Be verbose [level N]
             $Argument = Get-VimOption |
             Where-Object { $_.CompletionText -clike '-V' }
-            $toolTip = $Argument.ToolTip
-            $toolTip += "`n Always quote [fname]--e.g., 'C:\' or 'tst.log'"
+            $ToolTip = $Argument.ToolTip
+            $ToolTip += "`n Always quote [fname]--e.g., 'C:\' or 'tst.log'"
 
             $VimOption = $Matches[0]
-            $FileToComplete = $wordToComplete.Substring($VimOption.Length)
+            $FileToComplete = $WordToComplete.Substring($VimOption.Length)
 
-            Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $toolTip |
-            New-TabItem -CommandAst $commandAst -VimOption "${VimOption}"
+            Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $ToolTip |
+            New-TabItem -CommandAst $CommandAst -VimOption "${VimOption}"
         }
         '^-|^\+' {
             Get-VimOption |
-            Where-Object { $_.CompletionText -clike "$wordToComplete*" } |
+            Where-Object { $_.CompletionText -clike "$WordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            New-TabItem -ResultType 'ParameterName' -CommandAst $commandAst
+            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst
         }
         Default { return }
     }

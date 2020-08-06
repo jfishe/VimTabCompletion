@@ -145,7 +145,7 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-q'
-            ToolTip        = "-q [errorfile]`tEdit file with first error quickfix file]::file:_files"
+            ToolTip        = "-q [errorfile]`tEdit file with first error quickfix file]"
         }
         [PSCustomObject]@{
             CompletionText = '--cmd'
@@ -157,7 +157,7 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-S'
-            ToolTip        = "-S <session>`tSource file <session> after loading the first file::session file:_files"
+            ToolTip        = "-S <session>`tSource file <session> after loading the first file"
         }
         [PSCustomObject]@{
             CompletionText = '-s'
@@ -224,7 +224,7 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-T'
-            ToolTip        = "-T <terminal>`tSet terminal type to <terminal>:::_terminals"
+            ToolTip        = "-T <terminal>`tSet terminal type to <terminal>"
         }
         [PSCustomObject]@{
             CompletionText = '--not-a-term'
