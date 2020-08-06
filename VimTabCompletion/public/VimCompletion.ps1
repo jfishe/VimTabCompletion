@@ -130,14 +130,7 @@ function VimCompletion {
         '^-[rL]$' {
             Get-VimSwapFile |
             Where-Object { $_.CompletionText -like "*$wordToComplete*" } |
-            ForEach-Object -Process {
-                $completionText = $_.CompletionText
-                $listItemText = $_.ListItemText
-                $toolTip = $_.ToolTip
-
-                New-Object System.Management.Automation.CompletionResult `
-                    $completionText, $listItemText, 'ProviderItem', $toolTip
-            }
+            New-TabItem -CommandAst $commandAst -ResultType 'ProviderItem' `
 
             return
         }
@@ -177,6 +170,8 @@ function VimCompletion {
 
             Get-VimChildItem -Path "$wordToComplete*" -ToolTip $toolTip |
             New-TabItem -CommandAst $commandAst
+
+            return
         }
     }
 
