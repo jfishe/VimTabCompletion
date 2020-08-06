@@ -1,17 +1,15 @@
 <#
 .SYNOPSIS
-    Short description
+    Use vim -L to provide CompletionResult for swap files.
 .DESCRIPTION
-    Long description
+    Use vim -L to provide CompletionResult for swap files. ToolTip contains swap file information reported by vim -L.
 .EXAMPLE
     PS C:\> <example usage>
     Explanation of what the example does
 .INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
+    None.
 .NOTES
-    General notes
+    Vim writes to stderr which polutes $Error in PowerShell. Oppen issue: https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
 #>
 
 function Get-VimSwapFile {
@@ -20,40 +18,49 @@ function Get-VimSwapFile {
     $Search = 'In directory', 'In current directory'
     # $EmptyDirectory = '-- none --'
 
+    # Vim writes to stderr which polutes $Error in PowerShell. Oppen issue:
+    # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
+    # Strip the PowerShell exception wrapper from Stream 2.
     $SwapFile = & { vim -L } 2>&1 | ForEach-Object -Process { $_.ToString() } |
     Where-Object { $_ -ne 'System.Management.Automation.RemoteException' }
 
-    # $VimSwapDirectory = $SwapFile | Select-String -CaseSensitive -Pattern @(
-    #     $Search -join '|')
-
     $Pattern = '('
     $Pattern += $Search -join '|'
-    $Pattern += ')|(^\d)'
+    $Pattern += ')|(^\d{1,2})'
 
     $SwapFile = $SwapFile |
     Select-String -NoEmphasis -Context 0, 5 -Pattern $Pattern
-    # return $VimSwapFile
-
 
     $VimSwapFile = @()
     $SwapFile | ForEach-Object -Process {
         if ($_.Matches.Groups[1].Success) {
-            if ($_.Line -cmatch $Search[1]) {
-                $InDirectory = '.\'
-            } else {
-                $InDirectory = $_.Line.Substring(16)
+            if ($_.Line -cmatch $Search[0]) {
+                $InDirectory = $_.Line.Split()
+                $InDirectory = $InDirectory[-1]
                 $InDirectory = $InDirectory.Substring(0, $InDirectory.Length - 1)
+            } else {
+                $InDirectory = $null
             }
         } elseif ($_.Matches.Groups[2].Success) {
-            $completionText = Convert-Path $InDirectory
-            $completionText += $_.Line.Substring(6)
-            $listItemText = $_.Line.Substring(6)
-            $toolTip = $_.Context.DisplayPostContext -join "`n"
+            $CompletionText = $_.Line.Split()
+
+            # PowerShell strips whitespace from first line in ToolTip, which
+            # breaks : alignment in ToolTip.  Add swap file name and newline to
+            # retain left padding of swap file information.
+            $ToolTip = "$CompletionText`n"
+
+            $CompletionText = $CompletionText[-1]
+
+            if ($null -ne $InDirectory) {
+                $InDirectory = Convert-Path $InDirectory
+                $CompletionText = "${InDirectory}${CompletionText}"
+            }
+
+            $ToolTip += $_.Context.DisplayPostContext -join "`n"
 
             $VimSwapFile += [PSCustomObject]@{
-                CompletionText = $completionText
-                ListItemText   = $listItemText
-                ToolTip        = $toolTip
+                CompletionText = $CompletionText
+                ToolTip        = $ToolTip
             }
         }
     }
