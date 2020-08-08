@@ -113,7 +113,8 @@ function VimCompletion {
                 $ListItemText = $_
 
                 New-Object System.Management.Automation.CompletionResult `
-                    $CompletionText, $ListItemText, 'ParameterValue', $ListItemText
+                    $CompletionText, $ListItemText, 'ParameterValue', `
+                    $ListItemText
             }
             return
         }
@@ -124,13 +125,58 @@ function VimCompletion {
 
             return
         }
+        '^-t$' {
+            # https://stackoverflow.com/questions/8761888/capturing-standard-out-and-error-with-start-process
+            try {
+                # Look for readtags executable.
+                $Command = Get-Command readtags -ErrorAction Stop
+
+                # Look for tags in current directory.
+                $TagFile = Get-ChildItem -Path .\ tags -ErrorAction Ignore
+
+                if ($null -eq $TagFile) {
+                    # Look for tags in project root.
+                    $TagFile = Invoke-Git rev-parse --show-toplevel `
+                        -ErrorAction Stop
+                    $TagFile = Get-ChildItem -Path "$TagFile" tags `
+                        -ErrorAction Stop
+                }
+            } catch {
+                return
+            }
+
+            $CompletionText = & $Command -t "$TagFile" -l |
+            ForEach-Object -Process {
+                ($_.Split())[0]
+            } |
+            Sort-Object -Unique -CaseSensitive |
+            ForEach-Object -Process {
+                [PSCustomObject]@{
+                    CompletionText = $_
+                }
+            }
+
+            $ToolTip = Get-VimOption |
+            Where-Object { $_.CompletionText -clike $Matches[0] }
+            $ToolTip = $ToolTip.ToolTip
+
+            $CompletionText |
+            Where-Object { $_.CompletionText -like "$WordToComplete*" } |
+            New-TabItem -CommandAst $CommandAst `
+                -ResultType 'ParameterValue' -ToolTip $ToolTip
+
+            return
+        }
         '^-T$' {
+            # Vim writes to stderr which polutes $Error in PowerShell. Oppen issue:
+            # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
             if ($PSVersionTable.Platform -eq 'Win32NT') {
-                $Argument = Get-VimOption |
+                $ToolTip = Get-VimOption |
                 Where-Object { $_.CompletionText -clike $Matches[0] }
-                $ToolTip = $Argument.ToolTip
+                $ToolTip = $ToolTip.ToolTip
                 $ToolTip += " (default: win32)"
 
+                # Strip the PowerShell exception wrapper from Stream 2.
                 $Terminal = `
                     & { vim --not-a-term --cmd ':set term=* | :qa!' } 2>&1 |
                 ForEach-Object -Process { $_.ToString() } |

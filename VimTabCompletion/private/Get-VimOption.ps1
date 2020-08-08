@@ -102,11 +102,11 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-r'
-            ToolTip        = "-r [swap file]`tList swap files and exit or recover from a swap file. Tab to list swap files"
+            ToolTip        = "-r [swap file]`tList swap files and exit or recover from a swap file."
         }
         [PSCustomObject]@{
             CompletionText = '-L'
-            ToolTip        = "-L [swap file]`tList swap files and exit or recover from a swap file. Tab to list swap files"
+            ToolTip        = "-L [swap file]`tList swap files and exit or recover from a swap file."
         }
         [PSCustomObject]@{
             CompletionText  = '-A'
@@ -161,19 +161,19 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-s'
-            ToolTip        = "-s <scriptin>`tRead Normal mode commands from file <scriptin>:script file:_files"
+            ToolTip        = "-s <scriptin>`tRead Normal mode commands from file <scriptin>"
         }
         [PSCustomObject]@{
             CompletionText = '-w'
-            ToolTip        = "-w <scriptout>`tAppend all typed commands to file <scriptout>:output file:_files"
+            ToolTip        = "-w <scriptout>`tAppend all typed commands to file <scriptout>"
         }
         [PSCustomObject]@{
             CompletionText = '-W'
-            ToolTip        = "-W <scriptout>`tWrite all typed commands to file <scriptout>:output file:_files"
+            ToolTip        = "-W <scriptout>`tWrite all typed commands to file <scriptout>"
         }
         [PSCustomObject]@{
             CompletionText = '--startuptime'
-            ToolTip        = "--startuptime <file>`tWrite startup timing messages to <file>:log file:_files"
+            ToolTip        = "--startuptime <file>`tWrite startup timing messages to <file>"
         }
         [PSCustomObject]@{
             CompletionText = '--help'
@@ -189,7 +189,7 @@ function Get-VimOption {
         }
         [PSCustomObject]@{
             CompletionText = '-t'
-            ToolTip        = "-t`tEdit file where tag is defined:tag:_complete_tag"
+            ToolTip        = "-t tag`tEdit file where tag is defined"
         }
     )
 
