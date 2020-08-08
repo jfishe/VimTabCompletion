@@ -1,1 +1,2 @@
 --exclude=_build_dependencies_
+--exclude=output
