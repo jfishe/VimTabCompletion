@@ -4,12 +4,19 @@
 .DESCRIPTION
     Use vim -L to provide CompletionResult for swap files. ToolTip contains swap file information reported by vim -L.
 .EXAMPLE
-    PS C:\> <example usage>
-    Explanation of what the example does
+    PS C:\> Get-VimSwapFile
+    CompletionText      ToolTip
+    ______________      _______
+    .gutctags.swp        1.     .gutctags.swp
+                                      dated: Sat Aug 08 12:12:16 2020
+                                  file name: C:/Users/fishe/GitHub/VimTabCompletion/.gutctags
+                                   modified: no
+                                  user name: fishe   host name: JOHN-AUD9AR3
+                                 process ID: 17364 (STILL RUNNING)
 .INPUTS
     None.
 .NOTES
-    Vim writes to stderr which polutes $Error in PowerShell. Oppen issue: https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
+    Vim writes to stderr which polutes $Error in PowerShell. Open issue: https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
 #>
 
 function Get-VimSwapFile {
@@ -18,7 +25,7 @@ function Get-VimSwapFile {
     $Search = 'In directory', 'In current directory'
     # $EmptyDirectory = '-- none --'
 
-    # Vim writes to stderr which polutes $Error in PowerShell. Oppen issue:
+    # Vim writes to stderr which polutes $Error in PowerShell. Open issue:
     # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
     # Strip the PowerShell exception wrapper from Stream 2.
     $SwapFile = & { vim -L } 2>&1 | ForEach-Object -Process { $_.ToString() } |

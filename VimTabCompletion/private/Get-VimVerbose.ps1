@@ -1,17 +1,28 @@
 <#
 .SYNOPSIS
-    Short description
+    Return an array of objects containing CompletionText and ToolTip for -V[N].
 .DESCRIPTION
-    Long description
+    Return an array of objects containing CompletionText and ToolTip for -V[N].
+
+    Depends on Get-VimOption.
 .EXAMPLE
-    PS C:\> <example usage>
-    Explanation of what the example does
-.INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
+    PS C:\> Get-VimVerbose
+    CompletionText ToolTip
+    -------------- -------
+                 0 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 1 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 2 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 4 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 5 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 8 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                 9 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                11 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                12 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                13 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                14 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
+                15 -V[N][fname]	Be verbose [level N] (default: 10) [log messages to fname]ΓÇª
 .NOTES
-    From vim normal mode, enter :help 'verbose"
+    From vim normal mode, enter :help 'verbose
 
 
     'verbose' 'vbs'		number	(default 0)

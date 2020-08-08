@@ -1,15 +1,12 @@
 <#
 .SYNOPSIS
-    Short Description
+    Return an arrary of objects containing CompletionText, ListItemText, ResultType and ToolTip for files and directories returned by Get-ChildItem -Path "$Path".
 .DESCRIPTION
-    Full Description
+    Return an arrary of objects containing CompletionText, ListItemText, ResultType and ToolTip for files and directories returned by Get-ChildItem -Path "$Path".
 .PARAMETER Path
-    Specifies a path to one location. Wildcards are accepted. The default
-    location is the current directory (`.`).
+    Specifies a path to one location. Wildcards are accepted. The default location is the current directory (`.`).
 .PARAMETER Quote
-    A switch to enable quoting of a file path, e.g.,
-    `-V10'C:\Users\startup.log`.
-    Paths containing whitespace are quoted by default.
+    A switch to enable quoting of a file path, e.g., `-V10'C:\Users\startup.log`.  Paths containing whitespace are quoted by default.
 .PARAMETER ToolTip
     Provide a ToolTip. Defaults to the file path.
 .EXAMPLE
@@ -22,7 +19,7 @@
 .NOTES
     None.
 .LINK
-    online help
+    None
 #>
 
 function Get-VimChildItem {

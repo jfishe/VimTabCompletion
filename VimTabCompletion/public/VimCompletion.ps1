@@ -271,7 +271,8 @@ function VimCompletion {
             Get-VimVerbose |
             Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
             Sort-Object -Property CompletionText -Unique |
-            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst -VimOption "${VimOption}"
+            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst `
+                -VimOption "${VimOption}"
         }
         '^-V\d{1,2}' {
             # -V[N][fname] Be verbose [level N]

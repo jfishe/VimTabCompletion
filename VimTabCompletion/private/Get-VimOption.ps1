@@ -1,11 +1,8 @@
 <#
 .SYNOPSIS
-    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip
-    properties. ExcludeArgument property lists incompatible OPTIONS.
+    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip properties. ExcludeArgument property lists incompatible OPTIONS.
 .DESCRIPTION
-    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip
-    properties. ExcludeArgument property lists incompatible OPTIONS separated
-    with the Regex 'or', '|', operator.
+    Convert Vim OPTIONS into PSCustomObject with CompletionText and ToolTip properties. ExcludeArgument property lists incompatible OPTIONS separated with the Regex 'or', '|', operator.
 
     CompletionText and ToolTip are required.
 .EXAMPLE
