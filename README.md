@@ -33,3 +33,8 @@ $Env:BHBuildSystem = 'LocalRepo1'
 
 `.\build.ps1 -Task Test`
 
+## License
+
+- MIT License: [LICENSE](LICENSE)
+- [RamblingCookieMonster / BuildHelpers](https://github.com/RamblingCookieMonster/BuildHelpers)
+created `Invoke-Git` under the MIT License: [ThirdPartyNotice](ThirdPartyNotice.md#invoke-git)
