@@ -1,18 +1,16 @@
 <#
 .SYNOPSIS
     Provide PowerShell completion for Vim Native applications
-
 .DESCRIPTION
-     Provide completion for vim, vimdiff, gvim, gvimdiff, and evim similar to
-     zsh. See LINK for `compdef vim`.
+     Provide completion for vim, vimdiff, gvim, gvimdiff, and evim similar to zsh. See LINK for `compdef vim`.
 
+     For PowerShell Core 6 and above, rely on TabExpansion2.
+
+     For Windows PowerShell 5.1 and below, override TabExpansion to handle -, -- & + correclty.
 .PARAMETER WordToComplete
-    This parameter is set to value the user has provided before they pressed
-    Tab. Used to determine tab completion values.
-
+    TabExpansion2 sets WordToComplete to value the user has provided before they pressed Tab. Used to determine tab completion values. It may be an empty string.
 .PARAMETER CommandAst
-    This parameter is set to the Abstract Syntax Tree (AST) for the current
-    input line.
+    This parameter is set to the Abstract Syntax Tree (AST) for the current input line.
 
     CommandElements    : {vim, --remote, -}
     InvocationOperator : Unknown
@@ -20,11 +18,12 @@
     Redirections       : {}
     Extent             : vim --remote -
     Parent             : vim --remote -
-
 .PARAMETER CursorPosition
-    This parameter is set to the position of the cursor when the user pressed
-    Tab.
+    This parameter is set to the position of the cursor when the user pressed Tab.
+.PARAMETER LastBlock
+    The legacy TabExpansion function sets this parameter to the last block, as delimited by | or ;, or otherwise to the entire command line, when the user presses Tab.
 
+    See Get-Help TabExpansion -Full for additional detail.
 .EXAMPLE
     PS C:\> vim - <Ctrl-Space>
     --                    -D                    --literal             -O                    --remote-tab          -T                    -x
@@ -37,7 +36,6 @@
     -d                    -L                    -o                    --remote-silent       --startuptime         -W
 
     --                      Only file names after this (does not work with default installed Windows *vim*.bat files)
-
 .EXAMPLE
     PS C:\> vim -V10'C:\ <Ctrl-Space>
     -V10'C:\data'                 -V10'C:\SWSETUP'
@@ -51,7 +49,52 @@
 
     PowerShell interprets : as a switch and . as a property. Surround the file
     name with single quotes, 'fname', to prevent this.
+.EXAMPLE
+    PS C:\> vim -V10'C:\ <Ctrl-Space>
 
+    -V10'C:\data'                 -V10'C:\SWSETUP'
+    -V10'C:\ESD'                  -V10'C:\Symbols'
+    -V10'C:\GENuclearEnergy'      -V10'C:\SymCache'
+    -V10'C:\inetpub'              -V10'C:\tools'
+    -V10'C:\Intel'                -V10'C:\Users'
+    -V10'C:\PerfLogs'             -V10'C:\Windows'
+    -V10'C:\Program Files'        -V10'C:\msdia80.dll'
+    -V10'C:\Program Files (x86)'
+
+    -V[N][fname]    Be verbose [level N] (default: 10) [log messages to fname]
+     When bigger than zero, Vim will give messages about what it is doing.
+      Always quote [fname]--e.g., 'C:\' or 'tst.log'
+.EXAMPLE
+    PS C:\> TabExpansion2 -inputScript 'vim --' -cursorColumn 6 | Select-Object -ExpandProperty CompletionMatches
+
+    CompletionText           ListItemText                ResultType ToolTip
+    --------------           ------------                ---------- -------
+    --                       --                       ParameterName --      Only file names after this
+    --clean                  --clean                  ParameterName --clean 'nocompatible', Vim defaults, no plugins, no viminfo
+    --cmd                    --cmd                    ParameterName --cmd <command> Execute <command> before loading any vimrc file
+    --help                   --help                   ParameterName -h  or  --help  Print Help and exit
+    --literal                --literal                ParameterName --literal       Don't expand wildcards
+    --nofork                 --nofork                 ParameterName --nofork        Foreground: Don't fork when starting GUI
+    --noplugin               --noplugin               ParameterName --noplugin      Don't load plugin scripts
+    --not-a-term             --not-a-term             ParameterName --not-a-term    Skip warning for input/output not being a terminal
+    --remote                 --remote                 ParameterName --remote <files>        Edit <files> in a Vim server if possible
+    --remote-expr            --remote-expr            ParameterName --remote-expr <expr>    Evaluate <expr> in a Vim server and print result
+    --remote-send            --remote-send            ParameterName --remote-send <keys>    Send <keys> to a Vim server and exit
+    --remote-silent          --remote-silent          ParameterName --remote-silent <files> Edit <files> in a Vim server if possible and don't complain if t...
+    --remote-tab             --remote-tab             ParameterName --remote-tab    Edit <files> in a Vim server if possible, but open tab page for each file
+    --remote-tab-silent      --remote-tab-silent      ParameterName --remote-tab-silent     Edit <files> in a Vim server if possible, but open tab page for each...
+    --remote-tab-wait        --remote-tab-wait        ParameterName --remote-tab-wait       Edit <files> in a Vim server if possible, but open tab page for each f...
+    --remote-tab-wait-silent --remote-tab-wait-silent ParameterName --remote-tab-wait-silent        Edit <files> in a Vim server if possible, but open tab page for...
+    --remote-wait            --remote-wait            ParameterName --remote-wait <files>   Edit <files> in a Vim server if possible and wait for files to hav...
+    --remote-wait-silent     --remote-wait-silent     ParameterName --remote-wait-silent <files>    Edit <files> in a Vim server if possible, wait for files to...
+    --serverlist             --serverlist             ParameterName --serverlist    List available Vim server names and exit
+
+    --servername             --servername             ParameterName --servername <name>     Send to/become the Vim server <name>. Tab to expand running server n...
+    --startuptime            --startuptime            ParameterName --startuptime <file>    Write startup timing messages to <file>
+
+    --ttyfail                --ttyfail                ParameterName --ttyfail       Exit if input or output is not a terminal
+
+    --version                --version                ParameterName --version       Print version information and exit
 .LINK
     https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced_parameters
 
@@ -65,41 +108,96 @@ function VimCompletion {
     [CmdletBinding()]
     [OutputType([System.Management.Automation.CompletionResult[]])]
     param(
-        [Parameter(Mandatory = $true, Position = 0)]
+        [Parameter(
+            ParameterSetName = 'AstInputSet',
+            Mandatory = $true,
+            Position = 0
+        )]
         [string]
-        $WordToComplete,
-        [Parameter(Mandatory = $true, Position = 1)]
+        $WordToComplete
+        ,
+        [Parameter(
+            ParameterSetName = 'AstInputSet',
+            Mandatory = $true,
+            Position = 1
+        )]
         [System.Management.Automation.Language.CommandAst]
-        $CommandAst,
-        [Parameter(Mandatory = $true, Position = 2)]
+        $CommandAst
+        ,
+        [Parameter(
+            ParameterSetName = 'AstInputSet',
+            Mandatory = $true,
+            Position = 2
+        )]
         [Int32]
         $CursorPosition
+        ,
+        [Parameter(
+            ParameterSetName = 'LegacyTabExpansion',
+            Mandatory = $true,
+            Position = 0
+        )]
+        [string]
+        $LastBlock
     )
-
-    # $global:dude = @("$WordToComplete", $CommandAst, $CursorPosition)
-    # $global:dude = [System.Management.Automation.Language.CommandAst] $CommandAst
 
     # mikebattista / PowerShell-WSL-Interop developed snippet to locate
     # PreviousWord based on CursorPosition.
     # https://github.com/mikebattista/PowerShell-WSL-Interop/blob/2dd31622200b12032febdff45fd9ef4bd69c15f9/WslInterop.psm1#L137
-    for ($i = 1; $i -lt $CommandAst.CommandElements.Count; $i++) {
-        $Extent = $CommandAst.CommandElements[$i].Extent
-        if ($CursorPosition -lt $Extent.EndColumnNumber) {
-            # The cursor is in the middle of a word to complete.
-            $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
-            break
-        } elseif ($CursorPosition -eq $Extent.EndColumnNumber) {
-            # The cursor is immediately after the current word.
-            $PreviousWord = $Extent.Text
-            break
-        } elseif ($CursorPosition -lt $Extent.StartColumnNumber) {
-            # The cursor is within whitespace between the previous and current words.
-            $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
-            break
-        } elseif ($i -eq $CommandAst.CommandElements.Count - 1 -and $CursorPosition -gt $Extent.EndColumnNumber) {
-            # The cursor is within whitespace at the end of the line.
-            $PreviousWord = $Extent.Text
-            break
+    if ( $LastBlock ) {
+        # Match space except enclosed in ' or ", and split on unquoted space.
+        # Does not handle orphan quotes.
+        # $Pattern = "\s(?=(?:['""][^'^""]*['""]|[^'""])*$)"
+        # $Words =  [regex]::Split($LastBlock, $Pattern)
+
+        $Words = [System.Management.Automation.PSParser]::Tokenize($LastBlock, [ref]$null) |
+        Select-Object -ExpandProperty Content
+
+        if ( $Words[-1] -match '^[-\+]' ) {
+            # Lastword starts with - or +
+            if ($LastBlock[-1] -eq ' ') {
+                # LastBlock ends with space as in `--servernam `
+                $WordToComplete = ''
+            } else {
+                # LastBlock ends without space as in `-V10`
+                $WordToComplete = $Words[-1]
+            }
+            $PreviousWord = $Words[-1]
+        } elseif ( $Words[-2] -match '^[-\+]' ) {
+            # Penultimate word starts with - or +
+            $PreviousWord = $Words[-2]
+            $WordToComplete = $Words[-1]
+        } else {
+            $PreviousWord = ''
+            $WordToComplete = $Words[-1]
+        }
+        # $PreviousWord = $PreviousWord -replace "'",""
+        # $WordToComplete = $WordToComplete -replace "'",""
+    } else {
+        $LastBlock = $CommandAst.Parent
+        for ($i = 1; $i -lt $CommandAst.CommandElements.Count; $i++) {
+            $Extent = $CommandAst.CommandElements[$i].Extent
+            if ($CursorPosition -lt $Extent.EndColumnNumber) {
+                # The cursor is in the middle of a word to complete.
+                $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
+                break
+            } elseif ($CursorPosition -eq $Extent.EndColumnNumber) {
+                # The cursor is immediately after the current word.
+                $PreviousWord = $Extent.Text
+                break
+            } elseif ($CursorPosition -lt $Extent.StartColumnNumber) {
+                # The cursor is within whitespace between the previous and
+                # current words.
+                $PreviousWord = $CommandAst.CommandElements[$i - 1].Extent.Text
+                break
+            } elseif (
+                $i -eq $CommandAst.CommandElements.Count - 1 -and `
+                    $CursorPosition -gt $Extent.EndColumnNumber
+            ) {
+                # The cursor is within whitespace at the end of the line.
+                $PreviousWord = $Extent.Text
+                break
+            }
         }
     }
 
@@ -119,9 +217,14 @@ function VimCompletion {
             return
         }
         '^-[rL]$' {
+            if ( $PSVersionTable.PSVersion.Major -lt 6 ) {
+                # PS 5 corrupts NativeCommandError, when 2>&1 redirects stderr
+                # from vim -r.
+                return
+            }
             Get-VimSwapFile |
             Where-Object { $_.CompletionText -like "*$WordToComplete*" } |
-            New-TabItem -CommandAst $CommandAst -ResultType 'ProviderItem' `
+            New-TabItem -Line $LastBlock -ResultType 'ProviderItem' `
 
             return
         }
@@ -162,15 +265,21 @@ function VimCompletion {
 
             $CompletionText |
             Where-Object { $_.CompletionText -like "$WordToComplete*" } |
-            New-TabItem -CommandAst $CommandAst `
+            New-TabItem -Line $LastBlock `
                 -ResultType 'ParameterValue' -ToolTip $ToolTip
 
             return
         }
         '^-T$' {
-            # Vim writes to stderr which polutes $Error in PowerShell. Oppen issue:
+            # Expand <terminal> in -T <terminal> Set terminal type to <terminal>
+            #
+            # Vim writes to stderr which polutes $Error in PowerShell. Open issue:
             # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
-            if ($PSVersionTable.Platform -eq 'Win32NT') {
+            #
+            # PS 5 corrupts NativeCommandError, when 2>&1 redirects stderr
+            # from vim -r.
+            if ($PSVersionTable.Platform -eq 'Win32NT' -and `
+                    $PSVersionTable.PSVersion.Major -lt 6 ) {
                 $ToolTip = Get-VimOption |
                 Where-Object { $_.CompletionText -clike $Matches[0] }
                 $ToolTip = $ToolTip.ToolTip
@@ -193,7 +302,7 @@ function VimCompletion {
                 }
 
                 $Terminal |
-                New-TabItem -CommandAst $CommandAst `
+                New-TabItem -Line $LastBlock `
                     -ResultType 'ParameterValue' -ToolTip $ToolTip
 
                 return
@@ -206,6 +315,9 @@ function VimCompletion {
             }
         }
         '^-[uU]$' {
+            # Expand [g]vimrc
+            # -u <vimrc> Use <vimrc> instead of any .vimrc
+            # -U <gvimrc> Use <gvimrc> instead of any .gvimrc
             $ToolTip = 'Skip initialization from files and environment variables'
             $Argument = @(
                 # Doesn't appear to work on Windows. Still sources vimrc.
@@ -232,7 +344,7 @@ function VimCompletion {
             $Argument |
             Where-Object { $_.CompletionText -clike "$WordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            New-TabItem -ResultType 'ParameterValue' -CommandAst $CommandAst
+            New-TabItem -ResultType 'ParameterValue' -Line $LastBlock
 
             # Complete [g]vimrc files.
             $Argument = Get-VimOption |
@@ -240,7 +352,7 @@ function VimCompletion {
             $ToolTip = $Argument.ToolTip
 
             Get-VimChildItem -Path "$WordToComplete*" -ToolTip $ToolTip |
-            New-TabItem -CommandAst $CommandAst
+            New-TabItem -Line $LastBlock
 
             return
         }
@@ -249,6 +361,10 @@ function VimCompletion {
     # Complete parameters starting with -|+ or default to Path completion.
     switch -Regex -CaseSensitive ($WordToComplete) {
         '^-[oOp]$' {
+            # Expand N:
+            # -o[N] Open N windows (default: one for each file)
+            # -O[N] Open N windows split vertically (default: one for each file)
+            # -p[N] Open N tab pages (default: one for each file)
             $ResultType = 'ParameterName'
 
             $Argument = Get-VimOption |
@@ -264,6 +380,7 @@ function VimCompletion {
 
         }
         '^-V' {
+            # Expand N in
             # -V[N] Be verbose [level N]
             $VimOption = $Matches[0]
             $OptionToComplete = $WordToComplete.Substring($VimOption.Length)
@@ -271,10 +388,11 @@ function VimCompletion {
             Get-VimVerbose |
             Where-Object { $_.CompletionText -like "$OptionToComplete*" } |
             Sort-Object -Property CompletionText -Unique |
-            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst `
+            New-TabItem -ResultType 'ParameterName' -Line $LastBlock `
                 -VimOption "${VimOption}"
         }
         '^-V\d{1,2}' {
+            # Expand fname in
             # -V[N][fname] Be verbose [level N]
             $Argument = Get-VimOption |
             Where-Object { $_.CompletionText -clike '-V' }
@@ -284,22 +402,20 @@ function VimCompletion {
             $VimOption = $Matches[0]
             $FileToComplete = $WordToComplete.Substring($VimOption.Length)
 
-            Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $ToolTip |
-            New-TabItem -CommandAst $CommandAst -VimOption "${VimOption}"
+            $result = Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $ToolTip
+            if ($WordToComplete -match '\s') {
+                $result | New-TabItem -Line $LastBlock
+            } else {
+                $result | New-TabItem -Line $LastBlock -VimOption "${VimOption}"
+            }
         }
-        '^-|^\+' {
+        '^[-+]' {
+            # Expand -, -- and + OPTIONS
             Get-VimOption |
             Where-Object { $_.CompletionText -clike "$WordToComplete*" } |
             Sort-Object -Property CompletionText -Unique -CaseSensitive |
-            New-TabItem -ResultType 'ParameterName' -CommandAst $CommandAst
+            New-TabItem -ResultType 'ParameterName' -Line $LastBlock
         }
         Default { return }
     }
 }
-
-$Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff', 'evim')
-
-Register-ArgumentCompleter `
-    -Command $Vim `
-    -Native `
-    -ScriptBlock $function:VimCompletion

@@ -55,8 +55,8 @@ Function New-TabItem {
         ,
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.Language.CommandAst]
-        $CommandAst
+        [String]
+        $Line
         ,
         [Parameter()]
         [String]
@@ -68,7 +68,7 @@ Function New-TabItem {
         # and -F
         if ($null -ne $ExcludeArgument) {
             $ExcludePattern = [Regex]::new($ExcludeArgument)
-            if ($ExcludePattern.IsMatch($CommandAst.Parent)) {
+            if ($ExcludePattern.IsMatch($Line)) {
                 return
             }
         }
