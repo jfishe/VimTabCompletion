@@ -1,148 +1,175 @@
-. $PSScriptRoot\Shared.ps1
-
 Describe "Vim TabExpansion Tests" {
     Context "Vim OPTIONS TabExpansion Tests" {
+        BeforeAll {
+            . $PSScriptRoot\Shared.ps1
+        }
         It "Tab completes all long options" {
             $result = & $module TabExpansion 'vim --' ' '
             $result.CompletionText -contains '--' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--clean' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--cmd' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--help' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--literal' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--nofork' |
-            Should -Be $true
+            Should -BeTrue
 
             if ($IsWindows) {
                 $result.CompletionText -contains '--windowid' |
-                Should -Be $true
+                Should -BeTrue
             } else {
                 $result.CompletionText -contains '--windowid' |
-                Should -Be $false
+                Should -BeFalse
             }
 
             $result.CompletionText -contains '--noplugin' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--not-a-term' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-expr' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-send' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-silent' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-tab' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-tab-silent' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-tab-wait' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-tab-wait-silent' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-wait' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--remote-wait-silent' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--serverlist' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--servername' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--startuptime' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--ttyfail' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -contains '--version' |
-            Should -Be $true
+            Should -BeTrue
         }
         It "Tab completes all short options" {
             $result = & $module TabExpansion 'vim -' ' '
             $result.CompletionText -ccontains '-' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-A' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-b' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-c' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-C' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-D' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-e' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-E' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-f' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-F' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-h' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-H' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-i' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-l' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-L' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-m' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-M' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-n' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-N' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-o' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-O' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-p' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-q' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-r' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-s' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-S' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-t' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-T' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-u' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-U' |
-            Should -Be $true
+            Should -BeTrue
 
             if ($IsWindows) {
                 $result.CompletionText -ccontains '-P' |
-                Should -Be $true
+                Should -BeTrue
             } else {
                 $result.CompletionText -ccontains '-P' |
-                Should -Be $false
+                Should -BeFalse
             }
 
             $result.CompletionText -ccontains '-v' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-V' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-w' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-W' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-x' |
-            Should -Be $true
+            Should -BeTrue
             $result.CompletionText -ccontains '-y' |
-            Should -Be $true
+            Should -BeTrue
+        }
+    }
+    Context "Vim --servername TabExpansion Tests" {
+        BeforeAll {
+            # Start Vim server
+            $ArgumentList = @('--clean', '--servername', 'VIMTABEXP')
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '$VimProcess used in AfterAll block.')]
+            $VimProcess = Start-Process -FilePath $StartVim `
+                -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
+                -Verbose
+        }
+
+        It "Tab completes --servername <space>" {
+            $result = & $module TabExpansion 'vim --servername ' ' '
+            $result.CompletionText -ccontains 'VIMTABEXP' |
+            Should -BeTrue
+        }
+        It "Tab does not complete --servername" {
+            $result = & $module TabExpansion 'vim --servername' ' '
+            $result.CompletionText -ccontains 'VIMTABEXP' |
+            Should -BeFalse
+        }
+
+        AfterAll {
+            # Kill Vim server
+            $VimProcess.Kill()
         }
     }
 }
