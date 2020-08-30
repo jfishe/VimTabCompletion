@@ -60,7 +60,7 @@ function Get-VimSwapFile {
 
             if ($null -ne $InDirectory) {
                 $InDirectory = Convert-Path $InDirectory
-                $CompletionText = "${InDirectory}${CompletionText}"
+                $CompletionText = Join-Path $InDirectory $CompletionText
             }
 
             $ToolTip += $_.Context.DisplayPostContext -join "`n"
