@@ -428,3 +428,13 @@ function VimCompletion {
         Default { return }
     }
 }
+
+## POWERSHELL CORE TAB COMPLETION ##############################################################
+if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
+    $Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff', 'evim')
+    Microsoft.PowerShell.Core\Register-ArgumentCompleter `
+        -Command $Vim `
+        -Native `
+        -ScriptBlock $function:VimCompletion
+}
+

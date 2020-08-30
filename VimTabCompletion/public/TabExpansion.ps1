@@ -1,12 +1,3 @@
-## POWERSHELL CORE TAB COMPLETION ##############################################################
-if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
-    $Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff', 'evim')
-    Microsoft.PowerShell.Core\Register-ArgumentCompleter `
-        -Command $Vim `
-        -Native `
-        -ScriptBlock $function:VimCompletion
-}
-
 ## LEGACY TAB COMPLETION ##############################################################
 # We borrow the approach used by posh-git, in which we override any existing
 # functions named TabExpansion, look for commands we can complete on, and then
