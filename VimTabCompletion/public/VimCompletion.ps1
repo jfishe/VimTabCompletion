@@ -1,3 +1,13 @@
+# Define these variables since they are not defined in WinPS 5.x
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsWindows = $true
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsLinux = $false
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $IsMacOS = $false
+}
+
 <#
 .SYNOPSIS
     Provide PowerShell completion for Vim Native applications
@@ -278,8 +288,7 @@ function VimCompletion {
             #
             # PS 5 corrupts NativeCommandError, when 2>&1 redirects stderr
             # from vim -r.
-            if ($PSVersionTable.Platform -eq 'Win32NT' -and `
-                    $PSVersionTable.PSVersion.Major -lt 6 ) {
+            if ($IsWindows -and $PSVersionTable.PSVersion.Major -ge 6 ) {
                 $ToolTip = Get-VimOption |
                 Where-Object { $_.CompletionText -clike $Matches[0] }
                 $ToolTip = $ToolTip.ToolTip
