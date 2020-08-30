@@ -168,8 +168,165 @@ Describe "Vim TabExpansion Tests" {
         }
 
         AfterAll {
-            # Kill Vim server
-            $VimProcess.Kill()
+            # Shutdown Vim server
+            $ArgumentList = @( $ArgumentList[1], $ArgumentList[2],
+                '--remote-send', '<C-\><C-N>:qa!<CR>'
+            )
+            Start-Process -FilePath $StartVim `
+                -ArgumentList $ArgumentList  -PassThru `
+                -WindowStyle Minimized -Verbose
+        }
+    }
+    Context "Vim -rL TabExpansion Tests" {
+        BeforeAll {
+            $TestFile = "$(Get-Random).txt"
+            $TestPath = "TestDrive:\$TestFile"
+            # Start Vim server
+            $ArgumentList = @('--clean', '--servername', 'VIMTABEXP',
+                "$TestPath"
+            )
+            Start-Process -FilePath $StartVim `
+                -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
+                -Verbose
+        }
+
+        It "-r Tab completes $TestFile.swp" {
+            $result = & $module TabExpansion 'vim -r ' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            ForEach-Object -Process {
+                $_ -match "$TestFile.swp"
+            }
+            $result -contains $true |
+            Should -BeTrue
+        }
+        It "-L Tab completes $TestFile.swp" {
+            $result = & $module TabExpansion 'vim -L ' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            ForEach-Object -Process {
+                $_ -match "$TestFile.swp"
+            }
+            $result -contains $true |
+            Should -BeTrue
+        }
+
+        AfterAll {
+            # Shutdown Vim server
+            $ArgumentList = @( $ArgumentList[1], $ArgumentList[2],
+                '--remote-send', '<C-\><C-N>:qa!<CR>'
+            )
+            Start-Process -FilePath $StartVim `
+                -ArgumentList $ArgumentList  -PassThru `
+                -WindowStyle Minimized -Verbose
+        }
+    }
+
+    Context "Vim -t tag TabExpansion Tests" {
+        BeforeAll {
+            $TestPath = "TestDrive:\"
+            Push-Location $TestPath
+            $TestPath = Join-Path $TestPath 'tags'
+            Set-Content -Path $TestPath -Value $Tags -Encoding utf8
+        }
+        It "Vim -t completes tags" {
+            $result = & $module TabExpansion 'vim -t ' ' '
+            $result.CompletionText -ccontains 'ArgumentList' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'Building' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'ConfirmPreference' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'DeployParams' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'Destination' |
+            Should -BeTrue
+        }
+        It "Vim -t Argument only completes ArgumentList" {
+            $result = & $module TabExpansion 'vim -t Argument' ' '
+            $result.CompletionText -ccontains 'ArgumentList' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'Building' |
+            Should -BeFalse
+        }
+        AfterAll {
+            Pop-Location
+        }
+    }
+    Context "Vim -T terminal TabExpansion Tests" {
+        It "Vim -T <space> completes internal terminals" {
+            $result = & $module TabExpansion 'vim -T ' ' '
+            $result.CompletionText -ccontains 'win32' |
+            Should -BeTrue
+        }
+        It "Vim -T completes nothing" {
+            $result = & $module TabExpansion 'vim -T' ' '
+            $result | Should -BeNullOrEmpty
+        }
+    }
+    Context "Vim -uU TabExpansion Tests" {
+        It "Vim -u completes NONE NORC DEFAULTS ProviderItem ProviderContainer" {
+            $result = & $module TabExpansion 'vim -u ' ' '
+            $result.CompletionText -ccontains 'NONE' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'NORC' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'DEFAULTS' |
+            Should -BeTrue
+            $result.ResultType -contains 'ProviderItem' |
+            Should -BeTrue
+            $result.ResultType -contains 'ProviderContainer' |
+            Should -BeTrue
+        }
+        It "Vim -U completes NONE NORC ProviderItem ProviderContainer" {
+            $result = & $module TabExpansion 'vim -U ' ' '
+            $result.CompletionText -ccontains 'NONE' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'NORC' |
+            Should -BeTrue
+            $result.CompletionText -ccontains 'DEFAULTS' |
+            Should -BeFalse
+            $result.ResultType -contains 'ProviderItem' |
+            Should -BeTrue
+            $result.ResultType -contains 'ProviderContainer' |
+            Should -BeTrue
+        }
+    }
+    Context "Vim -oOp TabExpansion Tests" {
+        It "Vim -o[N] completes N=1..4" {
+            $result = & $module TabExpansion 'vim -o' ' '
+            $BeExactly = (1..4).ForEach( { "-o$_" }) + '-o'
+            $result.CompletionText | Should -BeExactly $BeExactly
+        }
+        It "Vim -O[N] completes N=1..4" {
+            $result = & $module TabExpansion 'vim -O' ' '
+            $BeExactly = (1..4).ForEach( { "-O$_" }) + '-O'
+            $result.CompletionText | Should -BeExactly $BeExactly
+        }
+        It "Vim -p[N] completes N=1..4" {
+            $result = & $module TabExpansion 'vim -p' ' '
+            $BeExactly = (1..4).ForEach( { "-p$_" }) + '-p'
+            $result.CompletionText | Should -BeExactly $BeExactly
+        }
+    }
+    Context "Vim -V TabExpansion Tests" {
+        It "Vim -V[N] completes N=0 1 2 4 5 8 9 11 12 13 14 15" {
+            $result = & $module TabExpansion 'vim -V' ' '
+            $BeExactly = @(0, 1, 2, 4, 5, 8, 9, 11, 12, 13, 14, 15)
+            $BeExactly = $BeExactly.ForEach( { "-V$_" }) + '-V'
+            $result.CompletionText | Should -BeExactly $BeExactly
+        }
+        It "Vim -V10 completes ProviderItem ProviderContainer" {
+            $result = & $module TabExpansion 'vim -V10' ' '
+            $result.ResultType -contains 'ProviderItem' |
+            Should -BeTrue
+            $result.ResultType -contains 'ProviderContainer' |
+            Should -BeTrue
+        }
+        It "Vim -V0 completes ProviderItem ProviderContainer" {
+            $result = & $module TabExpansion 'vim -V0' ' '
+            $result.ResultType -contains 'ProviderItem' |
+            Should -BeTrue
+            $result.ResultType -contains 'ProviderContainer' |
+            Should -BeTrue
         }
     }
 }
