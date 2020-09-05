@@ -2,7 +2,7 @@ TOPIC
     about_VimTabCompletion
 
 SHORT DESCRIPTION
-    Powershell Tab Completion for Vim
+    PowerShell Tab Completion for Vim
 
 LONG DESCRIPTION
     Complete available -, + and -- OPTIONS for Win32 Vim, Gvim, etc. Otherwise, complete files.
@@ -47,7 +47,9 @@ TROUBLESHOOTING NOTE:
          --socketid <xid>     Open Vim inside another GTK widget
          --echo-wid           Make gvim echo the Window ID on stdout
 
+  Not implemented in PowerShell 5.x:
+    -rLT PowerShell corrupts stnadard error.
+
 SEE ALSO
 
 KEYWORDS
-
