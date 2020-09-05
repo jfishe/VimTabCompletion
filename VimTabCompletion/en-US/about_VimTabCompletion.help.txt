@@ -13,7 +13,7 @@ LONG DESCRIPTION
 
     For -t use readtags to complete tags in the current directory or project root, as determined by `git rev-parse --show-toplevel`. Assume the file name is tags.
 
-    For -T complete builtin terminals supported by Vim. This only works for $PSVersionTable.Platform Win32NT. Terminfo is not currently supported.
+    For -T complete builtin terminals supported by Vim. This only works for Windows. Terminfo is not currently supported.
 
     For -u or -U, complete NONE, NORC, DEFAULTS and files, as appropriate.
 
