@@ -19,6 +19,16 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
     $IsLinux = $false
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $IsMacOS = $false
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $SkipPS5 = $true
+    # [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    # $BecausePS5 = 'not implemented'
+} else {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $SkipPS5 = $false
+    # [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    # $BecausePS5 = ' '
 }
 
 # Pester will use the alias instead of $StartVim with Start-Process.
