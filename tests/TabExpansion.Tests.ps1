@@ -184,10 +184,9 @@ Describe "Vim TabExpansion Tests" {
 
     Context "Vim -t tag TabExpansion Tests" {
         BeforeAll {
-            $TestPath = "TestDrive:\"
-            Push-Location $TestPath
-            $TestPath = Join-Path $TestPath 'tags'
-            Set-Content -Path $TestPath -Value $Tags -Encoding utf8
+            $TestPath = "TestDrive:\tags"
+            Copy-Item $PSScriptRoot\VimTags $TestPath
+            Push-Location ((Get-Item $TestPath).DirectoryName)
         }
         It "Vim -t completes tags" {
             $result = & $module TabExpansion 'vim -t ' ' '
