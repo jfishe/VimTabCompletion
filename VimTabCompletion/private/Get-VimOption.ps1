@@ -221,10 +221,11 @@ function Get-VimOption {
             CompletionText = '-N'
             ToolTip        = "-N`tNot fully Vi compatible: 'nocompatible'"
         }
-        [PSCustomObject]@{
-            CompletionText = '-T'
-            ToolTip        = "-T <terminal>`tSet terminal type to <terminal>"
-        }
+        # Not implemented
+        # [PSCustomObject]@{
+        #     CompletionText = '-T'
+        #     ToolTip        = "-T <terminal>`tSet terminal type to <terminal>"
+        # }
         [PSCustomObject]@{
             CompletionText = '--not-a-term'
             ToolTip        = "--not-a-term`tSkip warning for input/output not being a terminal"

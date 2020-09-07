@@ -22,34 +22,36 @@
 function Get-VimSwapFile {
     param()
 
-    $Search = 'In directory', 'In current directory'
-    # $EmptyDirectory = '-- none --'
+    $SwapFile = Invoke-Vim -Raw -RedirectStandardError -RedirectStandardOutput -L
 
-    # Vim writes to stderr which polutes $Error in PowerShell. Open issue:
-    # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
-    # Strip the PowerShell exception wrapper from Stream 2.
-    $SwapFile = & { vim -L } 2>&1 | ForEach-Object -Process { $_.ToString() } |
-    Where-Object { $_ -ne 'System.Management.Automation.RemoteException' }
+    $Search = 'In directory', 'In current directory'
 
     $Pattern = '('
     $Pattern += $Search -join '|'
     $Pattern += ')|(^\d{1,2})'
 
-    $SwapFile = $SwapFile |
-    Select-String -NoEmphasis -Context 0, 5 -Pattern $Pattern
+    # PS Core by default adds escape characters to colorize Select-String output.
+    # PS 5 does not implement -NoEmphasis.
+    if ( $PSVersionTable.PSVersion.Major -lt 6 ) {
+        $SwapFile = $SwapFile.Error |
+        Select-String -Context 0, 5 -Pattern $Pattern
+    } else {
+        $SwapFile = $SwapFile.Error |
+        Select-String -NoEmphasis -Context 0, 5 -Pattern $Pattern
+    }
 
     $VimSwapFile = @()
     $SwapFile | ForEach-Object -Process {
         if ($_.Matches.Groups[1].Success) {
             if ($_.Line -cmatch $Search[0]) {
-                $InDirectory = $_.Line.Split()
+                $InDirectory = $_.Line.TrimEnd().Split()
                 $InDirectory = $InDirectory[-1]
                 $InDirectory = $InDirectory.Substring(0, $InDirectory.Length - 1)
             } else {
                 $InDirectory = $null
             }
         } elseif ($_.Matches.Groups[2].Success) {
-            $CompletionText = $_.Line.Split()
+            $CompletionText = $_.Line.TrimEnd().Split()
 
             # PowerShell strips whitespace from first line in ToolTip, which
             # breaks : alignment in ToolTip.  Add swap file name and newline to

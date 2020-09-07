@@ -151,15 +151,7 @@ function VimCompletion {
         $LastBlock
     )
 
-    # mikebattista / PowerShell-WSL-Interop developed snippet to locate
-    # PreviousWord based on CursorPosition.
-    # https://github.com/mikebattista/PowerShell-WSL-Interop/blob/2dd31622200b12032febdff45fd9ef4bd69c15f9/WslInterop.psm1#L137
     if ( $LastBlock ) {
-        # Match space except enclosed in ' or ", and split on unquoted space.
-        # Does not handle orphan quotes.
-        # $Pattern = "\s(?=(?:['""][^'^""]*['""]|[^'""])*$)"
-        # $Words =  [regex]::Split($LastBlock, $Pattern)
-
         $Words = [System.Management.Automation.PSParser]::Tokenize($LastBlock, [ref]$null) |
         Select-Object -ExpandProperty Content
 
@@ -184,6 +176,9 @@ function VimCompletion {
         # $PreviousWord = $PreviousWord -replace "'",""
         # $WordToComplete = $WordToComplete -replace "'",""
     } else {
+        # mikebattista / PowerShell-WSL-Interop developed snippet to locate
+        # PreviousWord based on CursorPosition.
+        # https://github.com/mikebattista/PowerShell-WSL-Interop/blob/2dd31622200b12032febdff45fd9ef4bd69c15f9/WslInterop.psm1#L137
         $LastBlock = $CommandAst.Parent
         for ($i = 1; $i -lt $CommandAst.CommandElements.Count; $i++) {
             $Extent = $CommandAst.CommandElements[$i].Extent
@@ -227,11 +222,6 @@ function VimCompletion {
             return
         }
         '^-[rL]$' {
-            if ( $PSVersionTable.PSVersion.Major -lt 6 ) {
-                # PS 5 corrupts NativeCommandError, when 2>&1 redirects stderr
-                # from vim -r.
-                return
-            }
             Get-VimSwapFile |
             Where-Object { $_.CompletionText -like "*$WordToComplete*" } |
             New-TabItem -Line $LastBlock -ResultType 'ProviderItem' `
@@ -279,49 +269,6 @@ function VimCompletion {
                 -ResultType 'ParameterValue' -ToolTip $ToolTip
 
             return
-        }
-        '^-T$' {
-            # Expand <terminal> in -T <terminal> Set terminal type to <terminal>
-            #
-            # Vim writes to stderr which polutes $Error in PowerShell. Open issue:
-            # https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-667326937
-            #
-            # PS 5 corrupts NativeCommandError, when 2>&1 redirects stderr
-            # from vim -r.
-            if ($IsWindows -and $PSVersionTable.PSVersion.Major -ge 6 ) {
-                $ToolTip = Get-VimOption |
-                Where-Object { $_.CompletionText -clike $Matches[0] }
-                $ToolTip = $ToolTip.ToolTip
-                $ToolTip += " (default: win32)"
-
-                # Strip the PowerShell exception wrapper from Stream 2.
-                $Terminal = `
-                    & { vim --not-a-term --cmd ':set term=* | :qa!' } 2>&1 |
-                ForEach-Object -Process { $_.ToString() } |
-                Where-Object { $_ -ne
-                    'System.Management.Automation.RemoteException' }
-
-                $Terminal = $Terminal |
-                Select-String -NoEmphasis -Pattern '^\s' |
-                Where-Object { $_.Line.Trim() -like "$WordToComplete*" } |
-                ForEach-Object -Process {
-                    [PSCustomObject] @{
-                        CompletionText = $_.Line.Trim()
-                    }
-                }
-
-                $Terminal |
-                New-TabItem -Line $LastBlock `
-                    -ResultType 'ParameterValue' -ToolTip $ToolTip
-
-                return
-            } else {
-                # Not Implemented
-                # desc=( $TERMINFO ~/.terminfo $TERMINFO_DIRS /usr/{,share/}{,lib/}terminfo /{etc,lib}/terminfo )
-                # _wanted terminals expl 'terminal name' \
-                #     compadd "$@" - $desc/*/*(N:t)
-                return $null
-            }
         }
         '^-[uU]$' {
             # Expand [g]vimrc
@@ -430,11 +377,10 @@ function VimCompletion {
 }
 
 ## POWERSHELL CORE TAB COMPLETION ##############################################################
-if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 6)) {
+if (!$UseLegacyTabExpansion -and ($PSVersionTable.PSVersion.Major -ge 5)) {
     $Vim = @( 'vim', 'vimdiff', 'gvim', 'gvimdiff', 'evim')
     Microsoft.PowerShell.Core\Register-ArgumentCompleter `
         -Command $Vim `
         -Native `
         -ScriptBlock $function:VimCompletion
 }
-

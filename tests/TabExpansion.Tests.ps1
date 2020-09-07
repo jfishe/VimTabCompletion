@@ -87,7 +87,6 @@ Describe "Vim TabExpansion Tests" {
                 '--servername',
                 '--startuptime',
                 '-t',
-                '-T',
                 '--ttyfail',
                 '-u',
                 '-U',
@@ -152,7 +151,7 @@ Describe "Vim TabExpansion Tests" {
                 -Verbose
         }
 
-        It "-r Tab completes $TestFile.swp" -Skip:$SkipPS5 {
+        It "-r Tab completes $TestFile.swp" {
             $result = & $module TabExpansion 'vim -r ' ' ' |
             Select-Object -ExpandProperty CompletionText |
             ForEach-Object -Process {
@@ -161,7 +160,7 @@ Describe "Vim TabExpansion Tests" {
             $result -contains $true |
             Should -BeTrue
         }
-        It "-L Tab completes $TestFile.swp" -Skip:$SkipPS5 {
+        It "-L Tab completes $TestFile.swp" {
             $result = & $module TabExpansion 'vim -L ' ' ' |
             Select-Object -ExpandProperty CompletionText |
             ForEach-Object -Process {
@@ -208,17 +207,6 @@ Describe "Vim TabExpansion Tests" {
         }
         AfterAll {
             Pop-Location
-        }
-    }
-    Context "Vim -T terminal TabExpansion Tests" {
-        It "Vim -T <space> completes internal terminals" -Skip:$SkipPS5 {
-            $result = & $module TabExpansion 'vim -T ' ' '
-            $result.CompletionText -ccontains 'win32' |
-            Should -BeTrue
-        }
-        It "Vim -T completes nothing" -Skip:$SkipPS5 {
-            $result = & $module TabExpansion 'vim -T' ' '
-            $result | Should -BeNullOrEmpty
         }
     }
     Context "Vim -uU TabExpansion Tests" {
