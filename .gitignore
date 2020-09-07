@@ -1,6 +1,7 @@
 ### Vim ###
 # Coc.nvim
 .vim/
+tags*
 
 ### PowerShell ###
 output/
