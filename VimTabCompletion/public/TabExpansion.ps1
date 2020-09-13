@@ -84,10 +84,10 @@ function TabExpansion {
             VimCompletion -LastBlock "$LastBlock"
             break;
         }
-        '^Invoke-Vim (.*)' {
-            VimCompletion -LastBlock "$LastBlock"
-            break;
-        }
+        # '^Invoke-Vim (.*)' {
+        #     VimCompletion -LastBlock "$LastBlock"
+        #     break;
+        # }
         # Finally, fall back on existing tab expansion.
         default {
             if (Test-Path Function:\VimTabExpansionBackup) {
