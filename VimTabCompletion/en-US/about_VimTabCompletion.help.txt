@@ -1,55 +1,75 @@
 TOPIC
-    about_VimTabCompletion
+  about_VimTabCompletion
 
 SHORT DESCRIPTION
-    PowerShell Tab Completion for Vim
+  PowerShell Tab Completion for Vim
 
 LONG DESCRIPTION
-    Complete available -, + and -- OPTIONS for Win32 Vim, Gvim, etc. Otherwise, complete files.
+  Complete available -, + and -- OPTIONS for Win32 Vim, Gvim, etc. Otherwise, complete files.
 
-    For --servername complete running Vim servers.
+  For --servername complete running Vim servers.
 
-    For -r or -L complete swapfiles. Use vim -L to locate the swapfiles.
+  For -r or -L complete swapfiles. Use vim -L to locate the swapfiles.
 
-    For -t use readtags to complete tags in the current directory or project root, as determined by `git rev-parse --show-toplevel`. Assume the file name is tags.
+  For -t use readtags to complete tags in the current directory or project
+  root, as determined by `git rev-parse --show-toplevel`. Assume the file name
+  is tags.
 
-    For -T complete builtin terminals supported by Vim. This only works for Windows. Terminfo is not currently supported.
+  For -u or -U, complete NONE, NORC, DEFAULTS and files, as appropriate.
 
-    For -u or -U, complete NONE, NORC, DEFAULTS and files, as appropriate.
-
-    For -V complete verbosity level and log file.
+  For -V complete verbosity level and log file.
 
 EXAMPLES
-    Get-Help VimCompletion -Examples
+  Get-Help VimCompletion -Examples
 
 NOTE:
-    The only public function is VimCompletion in VimTabCompletion.ps1, which call Register-ArgumentCompleter.
+  VimCompletion completes Vim OPTIONS when called by TabExpansion or
+  TabExpansion2 via Register-ArgumentCompleter.
+
+  Invoke-Vim locates and starts the Vim or Gvim executable. It assumes vim.bat
+  is in $Env:PATH. Override with Invoke-Vim -VimPath C:\tools\vim\vim82\vim.bat.
+
+  Invoke-Vim reads $Env:VIM_EXE_DIR and Vim folder name, e.g.
+  vim82, from vim.bat. As with vim.bat, $Env:VIM overrides $Env:VIM_EXE_DIR but
+  uses the Vim folder name. $Env:VIMRUNTIME overrides all and should contain
+  the full path to the executable, e.g., C:\tools\vim\vim82.
 
 TROUBLESHOOTING NOTE:
-    vim -r or -L completion polutes $Error due to a PowerShell issue, which will be patched in after 7.0.3.
+  vim -r or -L completion polutes $Error due to a PowerShell issue, which will
+  be patched in after 7.0.3. Invoke-Vim provides a workaround using
+  [System.Diagnostics.Process].
 
-    Vim for Win32 does not support -g, so not implemented. Use gvim instead.
+  Vim for Win32 does not support -g, so not implemented. Use gvim or
+  `Invoke-Vim -g` instead.
 
-    Completion does not enforce option order, so -<Tab> or +<Tab> can follow --remote* and --, but Vim will treat any completions as files.
+  Invoke-Vim -c '10sleep' -c 'qa!'
+    Invoke-Vim: Cannot bind parameter because parameter 'c' is specified more
+    than once. Use one of the following workarounds:
 
-   Not implemented:
-      vimtutor
-      nvim
-      -P <parent title> Open Vim inside parent application
-      --windowid <HWND> Open Vim inside another win32 widget
-      -X Do not connect to X server
-      Arguments recognised by gvim (GTK+ version):
-         -font <font>         Use <font> for normal text (also: -fn)
-         -geometry <geom>     Use <geom> for initial geometry (also: -geom)
-         -reverse             Use reverse video (also: -rv)
-         -display <display>   Run vim on <display> (also: --display)
-         --role <role>        Set a unique role to identify the main window
-         --socketid <xid>     Open Vim inside another GTK widget
-         --echo-wid           Make gvim echo the Window ID on stdout
+    Invoke-Vim `-c '10sleep' `-c 'qa!'
+    Invoke-Vim  '-c 10sleep' '-c qa!'
 
-  Not implemented in PowerShell 5.x:
-    -rLT PowerShell corrupts stnadard error.
+  Completion does not enforce option order, so -<Tab> or +<Tab> can follow
+  --remote* and --, but Vim will treat any completions as files.
+
+ Not implemented:
+    vimtutor
+    nvim
+    -P <parent title> Open Vim inside parent application
+    --windowid <HWND> Open Vim inside another win32 widget
+    -X Do not connect to X server
+    -T <terminal>        Set terminal type to <terminal>
+
+    Arguments recognised by gvim (GTK+ version):
+       -font <font>         Use <font> for normal text (also: -fn)
+       -geometry <geom>     Use <geom> for initial geometry (also: -geom)
+       -reverse             Use reverse video (also: -rv)
+       -display <display>   Run vim on <display> (also: --display)
+       --role <role>        Set a unique role to identify the main window
+       --socketid <xid>     Open Vim inside another GTK widget
+       --echo-wid           Make gvim echo the Window ID on stdout
 
 SEE ALSO
 
 KEYWORDS
+  Vim Gvim TabExpansion TabExpansion2 ArgumentCompleter
