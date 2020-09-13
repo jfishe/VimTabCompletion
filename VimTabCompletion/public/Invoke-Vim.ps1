@@ -2,42 +2,63 @@
 .SYNOPSIS
     Start vim
 .DESCRIPTION
-    Locate and start a vim excutable passing arguments that are not used by Invoke-Vim.
+    Locate and start a vim or gvim excutable passing arguments that are not
+    used by Invoke-Vim.
 
     By default, start vim in the current shell.
 .PARAMETER Arguments
-    Arguments to pass to Vim executable. Defaults to the remaining parameters on the command line.
+    Arguments to pass to Vim executable. Defaults to the remaining parameters
+    on the command line.
+.PARAMETER Path
+    Path to working directory. Defaults to current directory.
+.PARAMETER VimPath
+    Path to specify vim excutable. E.g., 'vim' usually resolves to vim.bat,
+    which is read to locate vim.exe. The path to the excecutable may be
+    specified.
+.PARAMETER g
+    Start gvim instead of vim.
 .PARAMETER NoWindow
     Do not open a window. Similar to start hidden.
 .PARAMETER RedirectStandardError
     Capture stderr stream.
 .PARAMETER RedirectStandardOutput
     Capture stdout stream.
-.PARAMETER UseShellExecute
-    Open a separate shell to run Vim.
-.PARAMETER Path
-    Path to working directory. Defaults to current directory.
-.PARAMETER Quiet
-    Discard stdout and stderr streams.
-.PARAMETER Split
-    Character used to split stderr and stdout. Defaults to newline character.
 .PARAMETER Raw
     Return a PSCustomObject. Defaults to Write-Output and Write-Error, respectively.
     [pscustomobject]@{
         Command = $Command # Invocation string used to start Vim.
         Output  = $stdout
         Error   = $stderr
-.PARAMETER VimPath
-    Path to specify vim excutable. E.g., 'vim' usually resolves to vim.bat, which is read to locate vim.exe. The path to the excecutable may be specified.
+
+    Defaults to return stdout and stderr steams.
+.PARAMETER Quiet
+    Discard stdout and stderr streams.
+.PARAMETER UseShellExecute
+    True if the shell should be used when starting the process; false if the
+    process should be created directly from the executable file. The default is
+    true on .NET Framework apps and false on .NET Core apps.
+
+    Setting this property to false enables you to redirect input, output, and
+    error streams.
+
+    The word "shell" in this context (UseShellExecute) refers to a graphical shell
+    (similar to the Windows shell) rather than command shells (for example, bash or
+    sh) and lets users launch graphical applications or open documents.
+
+    See RELATED LINKS for more information.
+.PARAMETER Split
+    Character used to split stderr and stdout. Defaults to newline character.
 .EXAMPLE
-    PS C:\> <example usage>
-    Explanation of what the example does
-.INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
-.NOTES
-    General notes
+    PS C:\> $SwapFile = Invoke-Vim -Raw -RedirectStandardError -RedirectStandardOutput -L
+    PS C:\> $SwapFile.Error
+
+    Capture stderr from `vim -L` without updating $Error.
+.LINK
+    Capturing standard out and error with Start-Process (http://stackoverflow.com/questions/8761888/powershell-capturing-standard-out-and-error-with-start-process)
+.LINK
+    ProcessStartInfo.UseShellExecute Property (https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.useshellexecute?view=netcore-3.1)
+.LINK
+   System.Diagnostics.ProcessStartInfo (https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.processstartinfo.useshellexecute?view=netcore-3.1)
 #>
 
 function Invoke-Vim {
