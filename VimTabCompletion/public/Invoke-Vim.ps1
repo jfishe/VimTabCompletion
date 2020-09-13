@@ -43,9 +43,15 @@
 function Invoke-Vim {
     [cmdletbinding(DefaultParameterSetName = 'UseShellExecute')]
     param(
-        [parameter(Position = 0,
-            ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
         $Arguments
+        ,
+        [string]$Path = $PWD.Path
+        ,
+        [string]$VimPath = 'vim'
+        ,
+        [Parameter(ParameterSetName = 'Gvim')]
+        [switch]$g
         ,
         [Parameter(ParameterSetName = 'RedirectIO')]
         [switch]$CreateNoWindow = $false
@@ -56,47 +62,61 @@ function Invoke-Vim {
         [Parameter(ParameterSetName = 'RedirectIO')]
         [switch]$RedirectStandardOutput = $false
         ,
-        [Parameter(ParameterSetName = 'UseShellExecute')]
-        [switch]$UseShellExecute = $false
-        ,
-        [string]$Path = $PWD.Path
+        [Parameter(ParameterSetName = 'RedirectIO')]
+        [switch]$Raw
         ,
         [Parameter(ParameterSetName = 'RedirectIO')]
         [switch]$Quiet
         ,
-        [string]$Split = "`n"
+        [Parameter(ParameterSetName = 'Gvim')]
+        [Parameter(ParameterSetName = 'UseShellExecute')]
+        [switch]$UseShellExecute = $false
         ,
         [Parameter(ParameterSetName = 'RedirectIO')]
-        [switch]$Raw
-        ,
-        [string]$VimPath = 'vim'
+        [Parameter(ParameterSetName = 'UseShellExecute')]
+        [string]$Split = "`n"
     )
 
-    if ( -not (
-            $VimCommand = Get-Command -CommandType Application -Name $VimPath `
-                -ErrorAction SilentlyContinue
-        )
+    if ($PSBoundParameters.ContainsKey('g')) {
+        $VimExecutable = 'gvim.exe'
+        if ( $PSBoundParameters.ContainsKey('Arguments') -and ($PSBoundParameters['Arguments'] -match '--nofork') ) {
+            $NoFork = $true
+        }
+        else {
+            $NoFork = $false
+        }
+    } else {
+        $VimExecutable = 'vim.exe'
+        $NoFork = $true
+    }
+    if ( $VimCommand = Get-Command -CommandType Application -Name $VimPath `
+            -ErrorAction Ignore
     ) {
-        throw "Could not find command at VimPath [$VimPath]"
-    }
-    $Pattern = @( '^set VIM_EXE_DIR=', '^"%VIM_EXE_DIR%\\[a-zA-Z].*\.exe')
-    if ($VimCommand.Extension -eq '.bat') {
-        $VimCommand = $VimCommand | Get-Content |
-        Select-String -Pattern $Pattern
+        if ($VimCommand.Extension -eq '.bat') {
+            $Pattern = @( '^set VIM_EXE_DIR=', '^"%VIM_EXE_DIR%\\[a-zA-Z].*\.exe')
+            $VimCommand = $VimCommand | Get-Content |
+            Select-String -Pattern $Pattern
 
-        $Env:VIM_EXE_DIR = ($VimCommand -split '=')[1]
+            $Env:VIM_EXE_DIR = ($VimCommand -split '=')[1]
 
-        $VimVersion = Split-Path $Env:VIM_EXE_DIR -Leaf
+            $VimVersion = Split-Path $Env:VIM_EXE_DIR -Leaf
 
-        if ($Env:VIM -and (Test-Path "$Env:VIM\$VimVersion\vim.exe")) {
-            $Env:VIM_EXE_DIR = "$Env:VIM\$VimVersion"
+            if ($Env:VIM -and (Test-Path "$Env:VIM\$VimVersion\$VimExecutable")) {
+                $Env:VIM_EXE_DIR = "$Env:VIM\$VimVersion"
+            }
         }
-        if ($Env:VIMRUNTIME -and (Test-Path "$Env:VIMRUNTIME\vim.exe")) {
-            $Env:VIM_EXE_DIR = "$Env:VIMRUNTIME"
-        }
-
-        $VimCommand = Join-Path $Env:VIM_EXE_DIR 'vim.exe'
+    } elseif ($Env:VIMRUNTIME -and (Test-Path "$Env:VIMRUNTIME\$VimExecutable")) {
+        Write-Warning "Could not find Vim at VimPath [$VimPath]"
+    } else {
+        $Exception = "Could not find Vim at VimPath [$VimPath] or "
+        $Exception += 'in $Env:VIMRUNTIME.'
+        throw "$Exception"
     }
+    if ($Env:VIMRUNTIME -and (Test-Path "$Env:VIMRUNTIME\$VimExecutable")) {
+        $Env:VIM_EXE_DIR = "$Env:VIMRUNTIME"
+    }
+
+    $VimCommand = Join-Path $Env:VIM_EXE_DIR $VimExecutable
 
     $Path = (Resolve-Path $Path).Path
     # http://stackoverflow.com/questions/8761888/powershell-capturing-standard-out-and-error-with-start-process
@@ -115,7 +135,7 @@ function Invoke-Vim {
     $p = New-Object System.Diagnostics.Process
     $p.StartInfo = $pinfo
     $null = $p.Start()
-    $p.WaitForExit()
+    if ( $NoFork ) { $p.WaitForExit() }
     if ($Quiet) {
         return
     } else {
