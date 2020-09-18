@@ -13,15 +13,15 @@ Describe "Invoke-Vim Tests" {
     }
     AfterAll {
         #Remove environment variables
-        Remove-Item Env:\VIMRUNTIME -Force -ErrorAction SilentlyContinue
-        Remove-Item Env:\VIM_EXE_DIR -Force -ErrorAction SilentlyContinue
-        Remove-Item Env:\VIM  -Force -ErrorAction SilentlyContinue
+        Remove-Item Env:\VIMRUNTIME -Force -ErrorAction Ignore
+        Remove-Item Env:\VIM_EXE_DIR -Force -ErrorAction Ignore
+        Remove-Item Env:\VIM  -Force -ErrorAction Ignore
     }
     BeforeEach {
         #Remove environment variables
-        Remove-Item Env:\VIMRUNTIME -Force -ErrorAction SilentlyContinue
-        Remove-Item Env:\VIM_EXE_DIR -Force -ErrorAction SilentlyContinue
-        Remove-Item Env:\VIM  -Force -ErrorAction SilentlyContinue
+        Remove-Item Env:\VIMRUNTIME -Force -ErrorAction Ignore
+        Remove-Item Env:\VIM_EXE_DIR -Force -ErrorAction Ignore
+        Remove-Item Env:\VIM  -Force -ErrorAction Ignore
     }
     Context "Invoke-Vim -VimPath" {
         It "Invoke-Vim -VimPath 'Nowhere' throws RuntimeException" {
