@@ -11,6 +11,8 @@ environment:
 
 install:
   - cinst vim
+  - pwsh: refreshenv
+  - pwsh: Get-Command -Name vim -All -Verbose | Format-List
 
 cache:
   - _build_dependencies_ -> *.Depend.psd1
@@ -18,4 +20,4 @@ cache:
 build: off
 
 test_script:
-  - ps: . .\build.ps1
+  - pwsh: . .\build.ps1
