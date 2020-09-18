@@ -20,5 +20,4 @@ cache:
 build: off
 
 test_script:
-  - pwsh: . .\build.ps1
-  - pwsh: $Error
+  - pwsh .\build.ps1
