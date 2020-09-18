@@ -1,13 +1,16 @@
 skip_commits:
   message: /Updated (readme|docs).*|!skipci/
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 clone_folder: C:\projects\VimTabCompletion
 
 environment:
   NugetApiKey:
-    secure: *
+    secure: pQNh/Ufe3iH2DwBCI6/MEFq+Az3WouUxBWpsLztdukB7M4k2BfLJpUo+MrKiou+S
+
+install:
+  - cinst vim
 
 cache:
   - _build_dependencies_ -> *.Depend.psd1
