@@ -12,7 +12,7 @@
 RootModule = 'VimTabCompletion.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.0'
+ModuleVersion = '1.2.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -27,7 +27,7 @@ Author = 'jdfenw@gmail.com'
 CompanyName = 'Unknown'
 
 # Copyright statement for this module
-Copyright = '(c) jdfenw@gmail.com. All rights reserved.'
+Copyright = '(c) 2020 John D. Fisher. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Powershell Tab Completion for Vim'
@@ -116,7 +116,7 @@ PrivateData = @{
         # RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
-        ExternalModuleDependencies = @('vim')
+        ExternalModuleDependencies = @('vim', 'ctags')
 
     } # End of PSData hashtable
 
