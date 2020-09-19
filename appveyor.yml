@@ -11,8 +11,10 @@ environment:
 
 install:
   - cinst vim
+  - cinst ctags
   - pwsh: refreshenv
   - pwsh: Get-Command -Name vim -All -Verbose | Format-List
+  - pwsh: Get-Command -Name readtags -All -Verbose | Format-List
 
 cache:
   - _build_dependencies_ -> *.Depend.psd1
