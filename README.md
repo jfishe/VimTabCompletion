@@ -55,7 +55,7 @@ Install-Module -Name VimTabCompletion -AllowClobber
 # dependent module 'vim' is installed.
 # WARNING: The externally managed, dependent module 'ctags' is not installed on
 # this computer. To use the current module 'VimTabCompletion', ensure that its
-# dependent module 'vim' is installed.
+# dependent module 'ctags' is installed.
 ```
 
 ## Building
