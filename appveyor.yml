@@ -1,5 +1,7 @@
 skip_commits:
-  message: /Updated (readme|docs).*|!skipci/
+  message: /(docs|chore).*|!skipci/
+  files:
+    - '**/*.md'
 
 image: Visual Studio 2019
 
@@ -22,4 +24,5 @@ cache:
 build: off
 
 test_script:
-  - pwsh .\build.ps1
+  - pwsh: .\build.ps1
+  - ps: .\build.ps1 -Task Test

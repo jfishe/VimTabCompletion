@@ -4,6 +4,8 @@ Powershell Tab Completion for Vim
 
 Author: jdfenw@gmail.com
 
+[![Build status](https://ci.appveyor.com/api/projects/status/jonu96qiyjhqknba?svg=true)](https://ci.appveyor.com/project/jfishe/vimtabcompletion)
+
 VimTabCompletion was tested against Windows PowerShell 5.1 and PowerShell Core
 7.0.3 on Windows. Refer to
 [about_VimTabCompletion](VimTabCompletion/en-US/about_VimTabCompletion) for
