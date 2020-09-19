@@ -11,7 +11,7 @@ environment:
 
 install:
   - cinst vim
-  - cinst ctags
+  - cinst universal-ctags
   - pwsh: refreshenv
   - pwsh: Get-Command -Name vim -All -Verbose | Format-List
   - pwsh: Get-Command -Name readtags -All -Verbose | Format-List

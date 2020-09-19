@@ -117,6 +117,7 @@ Describe "Vim TabExpansion2 Tests" {
             Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
+	    Start-Sleep -s 5 -Verbose
         }
 
         It "Vim --servername VIMTAB Column 23 completes VIMTABEXP" {
@@ -141,11 +142,12 @@ Describe "Vim TabExpansion2 Tests" {
         AfterAll {
             # Shutdown Vim server
             $ArgumentList = @( $ArgumentList[1], $ArgumentList[2],
-                '--remote-send', '<C-\><C-N>:qa!<CR>'
+                '--remote-send', '''<C-\><C-N>:qa!<CR>'''
             )
             Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru `
                 -WindowStyle Minimized -Verbose
+	    Start-Sleep -s 5 -Verbose
         }
     }
     Context "Vim -rL TabExpansion2 Tests" {
@@ -159,6 +161,7 @@ Describe "Vim TabExpansion2 Tests" {
             Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
+	    Start-Sleep -s 5 -Verbose
         }
 
         It "-r Tab completes $TestFile.swp" {
@@ -183,11 +186,12 @@ Describe "Vim TabExpansion2 Tests" {
         AfterAll {
             # Shutdown Vim server
             $ArgumentList = @( $ArgumentList[1], $ArgumentList[2],
-                '--remote-send', '<C-\><C-N>:qa!<CR>'
+                '--remote-send', '''<C-\><C-N>:qa!<CR>'''
             )
             Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru `
                 -WindowStyle Minimized -Verbose
+	    Start-Sleep -s 5 -Verbose
         }
     }
     Context "Vim -t tag TabExpansion2 Tests" {
