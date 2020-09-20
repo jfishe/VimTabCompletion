@@ -120,15 +120,15 @@ Describe "Vim TabExpansion Tests" {
             }
         }
 
-        It "Tab --servername <space> completes VIMTABEXP" {
-            $result = & $module TabExpansion 'vim --servername ' ' '
-            $result.CompletionText -ccontains 'VIMTABEXP' |
-            Should -BeTrue
+        It "Tab --servername VIMTAB completes VIMTABEXP" {
+            $result = & $module TabExpansion 'vim --servername VIMTAB' ' '
+            $result.CompletionText |
+            Should -BeExactly 'VIMTABEXP'
         }
         It "Tab does not complete --servername" {
             $result = & $module TabExpansion 'vim --servername' ' '
-            $result.CompletionText -ccontains 'VIMTABEXP' |
-            Should -BeFalse
+            $result.CompletionText |
+            Should -BeNullOrEmpty
         }
 
         AfterAll {

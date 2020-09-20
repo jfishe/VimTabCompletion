@@ -134,11 +134,11 @@ Describe "Vim TabExpansion2 Tests" {
             $result.CompletionMatches.CompletionText |
             Should -BeExactly '--servername'
         }
-        It "Vim --servername VIMTAB Column 17 completes --servername" {
+        It "Vim --servername VIMTAB Column 17 completes VIMTABEXP" {
             $result = & $module TabExpansion2 `
-                -inputScript 'vim --servername VIMTAB' -cursorColumn 16
+                -inputScript 'vim --servername VIMTAB' -cursorColumn 17
             $result.CompletionMatches.CompletionText |
-            Should -BeExactly '--servername'
+            Should -Contain 'VIMTABEXP'
         }
 
         AfterAll {
