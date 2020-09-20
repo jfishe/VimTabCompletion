@@ -35,6 +35,14 @@ NOTE:
   the full path to the executable, e.g., C:\tools\vim\vim82.
 
 TROUBLESHOOTING NOTE:
+  Vim completion does not work after re-starting PowerShell.
+
+    Add `Import-Module VimTabCompletion` to $Env:PROFILE.
+
+    PowerShell lazy loads completions, so they are not available until a module
+    member is called. Native commands like Vim are not module members, so
+    completion does not work without importing the module.
+
   vim -r or -L completion polutes $Error due to a PowerShell issue, which will
   be patched in after 7.0.3. Invoke-Vim provides a workaround using
   [System.Diagnostics.Process].

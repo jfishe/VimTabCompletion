@@ -60,6 +60,10 @@ Install-Module -Name VimTabCompletion -AllowClobber
 # dependent module 'ctags' is installed.
 ```
 
+Add `Import-Module VimTabCompletion` to `$Env:PROFILE`, because PowerShell does
+not activate completion until a module member is called in a session. Native
+commands like Vim are not module members.
+
 ## Building
 
 `.\build.ps1`
