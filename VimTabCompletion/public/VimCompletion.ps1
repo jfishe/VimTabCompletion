@@ -206,6 +206,12 @@ function VimCompletion {
         }
     }
 
+    # Empty result prevents file completion.
+    $EmptyResult = (
+        New-Object System.Management.Automation.CompletionResult `
+            ' ', ' ', 'ParameterValue', ' '
+    )
+
     switch -Regex -CaseSensitive ($PreviousWord) {
         '--servername' {
             & vim --serverlist |
@@ -222,11 +228,14 @@ function VimCompletion {
             return
         }
         '^-[rL]$' {
-            Get-VimSwapFile |
+            $result = Get-VimSwapFile |
             Where-Object { $_.CompletionText -like "*$WordToComplete*" } |
             New-TabItem -Line $LastBlock -ResultType 'ProviderItem' `
 
-            return
+            if ($result) {
+                return $result
+            }
+            return $EmptyResult
         }
         '^-t$' {
             # https://stackoverflow.com/questions/8761888/capturing-standard-out-and-error-with-start-process
@@ -245,7 +254,7 @@ function VimCompletion {
                         -ErrorAction Stop
                 }
             } catch {
-                return
+                return $EmptyResult
             }
 
             $CompletionText = & $Command -t "$TagFile" -l |

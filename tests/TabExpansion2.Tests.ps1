@@ -154,6 +154,20 @@ Describe "Vim TabExpansion2 Tests" {
             }
         }
     }
+    Context "Vim -rL without swapfile TabExpansion2 Tests" {
+        It "-r Tab completes nothing" {
+            $result = & $module TabExpansion2 `
+                -inputScript 'vim -r ' -cursorColumn 7
+            $result.CompletionMatches.CompletionText |
+            Should -BeExactly ' '
+        }
+        It "-L Tab completes nothing" {
+            $result = & $module TabExpansion2 `
+                -inputScript 'vim -L ' -cursorColumn 7
+            $result.CompletionMatches.CompletionText |
+            Should -BeExactly ' '
+        }
+    }
     Context "Vim -rL TabExpansion2 Tests" {
         BeforeAll {
             $TestFile = "$(Get-Random).txt"
@@ -200,6 +214,31 @@ Describe "Vim TabExpansion2 Tests" {
             while (-not ($VimProcess.HasExited)) {
                 Start-Sleep -Milliseconds 500 -Verbose
             }
+        }
+    }
+    Context "Vim -t without tags TabExpansion2 Tests" {
+        BeforeAll {
+            $TestPath = "TestDrive:\"
+            Push-Location $TestPath
+        }
+        It "Vim -t completes nothing" {
+            $result = & $module TabExpansion2 `
+                -inputScript 'vim -t ' -cursorColumn 7
+            $CompletionText = @(
+                ' '
+            )
+            $result.CompletionMatches.CompletionText |
+            Should -BeExactly $CompletionText
+        }
+        It "Vim -t Argument only completes nothing" {
+            $result = & $module TabExpansion2 `
+                -inputScript 'vim -t Argument' -cursorColumn 15
+            $CompletionText = ' '
+            $result.CompletionMatches.CompletionText |
+            Should -BeExactly $CompletionText
+        }
+        AfterAll {
+            Pop-Location
         }
     }
     Context "Vim -t tag TabExpansion2 Tests" {

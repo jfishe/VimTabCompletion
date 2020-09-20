@@ -145,6 +145,18 @@ Describe "Vim TabExpansion Tests" {
             }
         }
     }
+    Context "Vim -rL without swapfile TabExpansion2 Tests" {
+        It "-r Tab completes nothing" {
+            & $module TabExpansion 'vim -r ' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            Should -BeExactly ' '
+        }
+        It "-L Tab completes nothing" {
+            & $module TabExpansion 'vim -L ' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            Should -BeExactly ' '
+        }
+    }
     Context "Vim -rL TabExpansion Tests" {
         BeforeAll {
             $TestFile = "$(Get-Random).txt"
@@ -195,6 +207,25 @@ Describe "Vim TabExpansion Tests" {
         }
     }
 
+    Context "Vim -t without tags TabExpansion Tests" {
+        BeforeAll {
+            $TestPath = "TestDrive:\"
+            Push-Location $TestPath
+        }
+        It "Vim -t completes nothing" {
+            & $module TabExpansion 'vim -t ' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            Should -BeExactly ' '
+        }
+        It "Vim -t Argument only completes nothing" {
+            & $module TabExpansion 'vim -t Argument' ' ' |
+            Select-Object -ExpandProperty CompletionText |
+            Should -BeExactly ' '
+        }
+        AfterAll {
+            Pop-Location
+        }
+    }
     Context "Vim -t tag TabExpansion Tests" {
         BeforeAll {
             $TestPath = "TestDrive:\tags"

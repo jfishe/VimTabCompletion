@@ -9,11 +9,11 @@ LONG DESCRIPTION
 
   For --servername complete running Vim servers.
 
-  For -r or -L complete swapfiles. Use vim -L to locate the swapfiles.
+  For -r or -L complete swapfiles, if any; return a blank string otherwise.
 
   For -t use readtags to complete tags in the current directory or project
   root, as determined by `git rev-parse --show-toplevel`. Assume the file name
-  is tags.
+  is tags. If readtags or tags file are not found, return a blank string.
 
   For -u or -U, complete NONE, NORC, DEFAULTS and files, as appropriate.
 
