@@ -112,10 +112,11 @@ Describe "Vim TabExpansion Tests" {
         BeforeAll {
             # Start Vim server
             $ArgumentList = @('--clean', '--servername', 'VIMTABEXP')
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $VimProcess = Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
-            while (-not ($VimProcess.Responding)) {
+            while (-not ((& $StartVim --serverlist) -contains 'VIMTABEXP')) {
                 Start-Sleep -Milliseconds 500 -Verbose
             }
         }
@@ -152,10 +153,11 @@ Describe "Vim TabExpansion Tests" {
             $ArgumentList = @('--clean', '--servername', 'VIMTABEXP',
                 "$TestPath"
             )
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssigments', '')]
             $VimProcess = Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
-            while (-not ($VimProcess.Responding)) {
+            while (-not ((& $StartVim --serverlist) -contains 'VIMTABEXP')) {
                 Start-Sleep -Milliseconds 500 -Verbose
             }
         }
@@ -201,21 +203,21 @@ Describe "Vim TabExpansion Tests" {
         }
         It "Vim -t completes tags" {
             $result = & $module TabExpansion 'vim -t ' ' '
-                $CompletionText = @(
-                    'ArgumentList' ,
-                    'Building' ,
-                    'ConfirmPreference' ,
-                    'DeployParams' ,
-                    'Destination'
-                )
-                $result.CompletionText |
-                Should -BeExactly $CompletionText
+            $CompletionText = @(
+                'ArgumentList' ,
+                'Building' ,
+                'ConfirmPreference' ,
+                'DeployParams' ,
+                'Destination'
+            )
+            $result.CompletionText |
+            Should -BeExactly $CompletionText
         }
         It "Vim -t Argument only completes ArgumentList" {
             $result = & $module TabExpansion 'vim -t Argument' ' '
-                $CompletionText = 'ArgumentList'
-                $result.CompletionText |
-                Should -BeExactly $CompletionText
+            $CompletionText = 'ArgumentList'
+            $result.CompletionText |
+            Should -BeExactly $CompletionText
         }
         AfterAll {
             Pop-Location
