@@ -114,10 +114,12 @@ Describe "Vim TabExpansion2 Tests" {
         BeforeAll {
             # Start Vim server
             $ArgumentList = @('--clean', '--servername', 'VIMTABEXP')
-            Start-Process -FilePath $StartVim `
+            $VimProcess = Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
-	    Start-Sleep -s 5 -Verbose
+            while (-not ($VimProcess.Responding)) {
+                Start-Sleep -Milliseconds 500 -Verbose
+            }
         }
 
         It "Vim --servername VIMTAB Column 23 completes VIMTABEXP" {
@@ -145,9 +147,11 @@ Describe "Vim TabExpansion2 Tests" {
                 '--remote-send', '''<C-\><C-N>:qa!<CR>'''
             )
             Start-Process -FilePath $StartVim `
-                -ArgumentList $ArgumentList  -PassThru `
+                -ArgumentList $ArgumentList  `
                 -WindowStyle Minimized -Verbose
-	    Start-Sleep -s 5 -Verbose
+            while (-not ($VimProcess.HasExited)) {
+                Start-Sleep -Milliseconds 500 -Verbose
+            }
         }
     }
     Context "Vim -rL TabExpansion2 Tests" {
@@ -158,10 +162,12 @@ Describe "Vim TabExpansion2 Tests" {
             $ArgumentList = @('--clean', '--servername', 'VIMTABEXP',
                 "$TestPath"
             )
-            Start-Process -FilePath $StartVim `
+            $VimProcess = Start-Process -FilePath $StartVim `
                 -ArgumentList $ArgumentList  -PassThru -WindowStyle Minimized `
                 -Verbose
-	    Start-Sleep -s 5 -Verbose
+            while (-not ($VimProcess.Responding)) {
+                Start-Sleep -Milliseconds 500 -Verbose
+            }
         }
 
         It "-r Tab completes $TestFile.swp" {
@@ -189,9 +195,11 @@ Describe "Vim TabExpansion2 Tests" {
                 '--remote-send', '''<C-\><C-N>:qa!<CR>'''
             )
             Start-Process -FilePath $StartVim `
-                -ArgumentList $ArgumentList  -PassThru `
+                -ArgumentList $ArgumentList  `
                 -WindowStyle Minimized -Verbose
-	    Start-Sleep -s 5 -Verbose
+            while (-not ($VimProcess.HasExited)) {
+                Start-Sleep -Milliseconds 500 -Verbose
+            }
         }
     }
     Context "Vim -t tag TabExpansion2 Tests" {
