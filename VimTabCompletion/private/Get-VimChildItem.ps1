@@ -1,3 +1,5 @@
+using namespace System.Management.Automation
+
 <#
 .SYNOPSIS
     Return an arrary of objects containing CompletionText, ListItemText, ResultType and ToolTip for files and directories returned by Get-ChildItem -Path "$Path".
@@ -24,65 +26,38 @@
 
 function Get-VimChildItem {
     [CmdletBinding()]
-    [OutputType([System.Management.Automation.PSObject[]])]
+    [OutputType([CompletionResult])]
     param (
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
         $Path
         ,
-        [Parameter(Mandatory = $false, Position = 1)]
+        [Parameter(Position = 1)]
         [switch]
         $Quote = $false
         ,
-        [Parameter(Mandatory = $false, Position = 2)]
+        [Parameter(Position = 2)]
         [string]
         $ToolTip = $null
     )
 
-    begin {
-        $Parent = Get-Location
-    }
-
-    process {
-        $Output = Get-ChildItem -Path "$Path" |
-        ForEach-Object -Process {
-
-            if ( $_.FullName.StartsWith($Parent) ) {
-                $completionText = $_ | Resolve-Path -Relative
-            } else {
-                $completionText = $_
-            }
-
+    [CompletionCompleters]::CompleteFilename("$Path") |
+    ForEach-Object -Process {
+        # [CompletionCompleters] have ReadOnly properties. To use the
+        # nonpublic SetValue and avoid InvalidOperation: 'CompletionText'
+        # is a ReadOnly property. Follow the instructions at
+        # https://learn-powershell.net/2016/06/27/quick-hits-writing-to-a-read-only-property/
+        if ($Quote -and ($_.CompletionText -notmatch "'")) {
             # Quote 'file path' to prevent PowerShell string and property
             # expansion.  Otherwise file.log will pass to vim as
             # `vim -V10file .log`
-            if ($Quote -or "$completionText" -match '\s') {
-                $completionText = "'${completionText}'"
-            } else {
-                $completionText = "${completionText}"
-            }
-
-            if ($_.PSIsContainer) {
-                $resultType = 'ProviderContainer'
-            } else {
-                $resultType = 'ProviderItem'
-            }
-
-            if ( $null -eq $ToolTip ) {
-                $toolTip = $completionText
-            } else {
-                $toolTip = $ToolTip
-            }
-
-            [PSCustomObject]@{
-                CompletionText = $completionText
-                ResultType     = $resultType
-                ToolTip        = $toolTip
-            }
+            $Field = $_.GetType().GetField('_completionText', 'static,nonpublic,instance')
+            $Field.SetValue($_, "'$($_.CompletionText)'")
         }
-    }
-
-    end {
-        return $Output
+        if ( $null -ne $ToolTip ) {
+            $Field = $_.GetType().GetField('_toolTip', 'static,nonpublic,instance')
+            $Field.SetValue($_, "$ToolTip")
+        }
+        $_
     }
 }
