@@ -316,8 +316,7 @@ function VimCompletion {
             Where-Object { $_.CompletionText -clike $Matches[0] }
             $ToolTip = $Argument.ToolTip
 
-            Get-VimChildItem -Path "$WordToComplete*" -ToolTip $ToolTip |
-            New-TabItem -Line $LastBlock
+            Get-VimChildItem -Path "$WordToComplete*" -ToolTip $ToolTip
 
             return
         }
@@ -367,11 +366,18 @@ function VimCompletion {
             $VimOption = $Matches[0]
             $FileToComplete = $WordToComplete.Substring($VimOption.Length)
 
-            $result = Get-VimChildItem -Path "$FileToComplete*" -Quote -ToolTip $ToolTip
-            if ($WordToComplete -match '\s') {
-                $result | New-TabItem -Line $LastBlock
+            if ($PreviousWord -match "'") {
+                # Issue #3: prevent -V10-V10'C:\
+                # Quotes lose track of the ParameterName, since the return is
+                # ProviderItem and ProviderContainer with -V[N] prepended.
+                # Don't re-quote or prepend -V[N] if a quote is already
+                # present.
+                Get-VimChildItem -Path "$FileToComplete*" ` -ToolTip $ToolTip |
+                New-TabItem -Line $LastBlock
             } else {
-                $result | New-TabItem -Line $LastBlock -VimOption "${VimOption}"
+                Get-VimChildItem -Path "$FileToComplete*" -Quote `
+                    -ToolTip $ToolTip |
+                New-TabItem -Line $LastBlock -VimOption "${VimOption}"
             }
         }
         '^[-+]' {
