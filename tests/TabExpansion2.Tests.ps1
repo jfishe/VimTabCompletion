@@ -375,12 +375,19 @@ Describe "Vim TabExpansion2 Tests" {
             $result.CompletionMatches.ResultType |
             Should -BeIn $ResultType
         }
-        It "Vim -V10 completes -V10'*'" {
+        It "Vim -V10'C:\' Column 13 completes -V10'*'" {
             $result = & $module TabExpansion2 `
-                -inputScript 'vim -V10' -cursorColumn 8
+                -inputScript 'vim -V10''C:\''' -cursorColumn 13
 
             $result.CompletionMatches.CompletionText |
             Should -MatchExactly '^-V10''.*''$'
+
+            $ResultType = @(
+                'ProviderItem',
+                'ProviderContainer'
+            )
+            $result.CompletionMatches.ResultType |
+            Should -BeIn $ResultType
         }
     }
 }
