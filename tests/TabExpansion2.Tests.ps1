@@ -363,16 +363,24 @@ Describe "Vim TabExpansion2 Tests" {
             $result.CompletionMatches.ResultType |
             Should -BeIn $ResultType
         }
-        It "Vim -V0 completes ProviderItem ProviderContainer" {
+        It "Vim -V0 completes ParameterName ProviderItem ProviderContainer" {
             $result = & $module TabExpansion2 `
-                -inputScript 'vim -V10' -cursorColumn 8
+                -inputScript 'vim -V0' -cursorColumn 7
 
             $ResultType = @(
+                'ParameterName',
                 'ProviderItem',
                 'ProviderContainer'
             )
             $result.CompletionMatches.ResultType |
             Should -BeIn $ResultType
+        }
+        It "Vim -V10 completes -V10'*'" {
+            $result = & $module TabExpansion2 `
+                -inputScript 'vim -V10' -cursorColumn 8
+
+            $result.CompletionMatches.CompletionText |
+            Should -MatchExactly '^-V10''.*''$'
         }
     }
 }
