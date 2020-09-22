@@ -14,18 +14,22 @@ environment:
 install:
   - cinst vim
   - cinst universal-ctags
+  - cinst git
   - pwsh: refreshenv
   - pwsh: Get-Command -Name vim -All -Verbose | Format-List
   - pwsh: Get-Command -Name readtags -All -Verbose | Format-List
 
 cache:
   - _build_dependencies_ -> *.Depend.psd1
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - C:\Tools\vim -> appveyor.yml
 
 build: off
 
 test_script:
-  - pwsh: .\build.ps1
-  - ps: .\build.ps1 -Task Test
+  - pwsh: . .\build.ps1 -Task Build
+  - ps: . .\build.ps1 -Task Test
 
 on_finish:
   - pwsh: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
