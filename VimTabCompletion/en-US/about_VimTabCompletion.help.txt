@@ -60,6 +60,9 @@ TROUBLESHOOTING NOTE:
   Completion does not enforce option order, so -<Tab> or +<Tab> can follow
   --remote* and --, but Vim will treat any completions as files.
 
+  vim -V10C:\ completes vim -V10C:'C:\....
+    Use vim -V10'C:\ instead.
+
  Not implemented:
     vimtutor
     nvim
