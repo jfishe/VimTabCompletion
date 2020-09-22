@@ -20,19 +20,21 @@ install:
   - pwsh: Get-Command -Name readtags -All -Verbose | Format-List
   - pwsh: Get-Command -Name git -All -Verbose | Format-List
 
-# cache:
-#   - _build_dependencies_ -> *.Depend.psd1
-#   - C:\ProgramData\chocolatey\bin -> appveyor.yml
-#   - C:\ProgramData\chocolatey\lib -> appveyor.yml
-#   - C:\Tools\vim -> appveyor.yml
+cache:
+  - _build_dependencies_ -> *.Depend.psd1
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - C:\Tools\ -> appveyor.yml
 
 build: off
 
 test_script:
-  - pwsh: $PSVersionTable
-  - pwsh: . .\build.ps1 -Task Build
   - ps: $PSVersionTable
-  - ps: . .\build.ps1 -Task Test
+  - ps: .\build.ps1 -Task Build, Test
+  - ps: $Error
+  - pwsh: $PSVersionTable
+  - pwsh: .\build.ps1
+  - pwsh: $Error
 
-on_finish:
-  - pwsh: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+#   - pwsh: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
