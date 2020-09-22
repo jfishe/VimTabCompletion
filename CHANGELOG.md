@@ -1,5 +1,46 @@
 # Change Log
 
+## [1.3.1](https://github.com/jfishe/VimTabCompletion/compare/1.3.0...1.3.1)
+<a name="1.3.1"></a>
+
+> 2020-09-22
+
+### Build
+
+* **appveyor:** add console
+* **appveyor:** fix cache Chocolatey
+* **appveyor:** reorder test_script
+* **appveyor:** dot source build
+* **appveyor:** remove cache
+* **appveyor:** dot source build.ps1
+* **psd1:** !deploy 1.3.1
+
+### Docs
+
+* troubleshoot lazy loading completions
+* **README:** add Git and CHANGELOG
+* **about_VimTabCompletion:** add -V10C:\
+
+### Fix
+
+* **Get-VimChildItem:** add PS 5 CompletionResult
+* **Get-VimChildItem:** remove using namespace
+* **VimCompletion:** -V[N]'C:\ completion
+
+### Refactor
+
+* **Get-VimChildItem:** use CompletionCompleters
+
+### Test
+
+* add PS version details to Describe
+* **TabExpansion2:** add -V10'C:\' test
+
+### Tests
+
+* **TabExpansion2:** fix -V0
+
+
 ## [1.3.0](https://github.com/jfishe/VimTabCompletion/compare/1.2.1...1.3.0)
 <a name="1.3.0"></a>
 

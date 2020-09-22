@@ -12,7 +12,7 @@
 RootModule = 'VimTabCompletion.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.3.0'
+ModuleVersion = '1.3.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -116,7 +116,7 @@ PrivateData = @{
         # RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
-        ExternalModuleDependencies = @('vim', 'ctags')
+        ExternalModuleDependencies = @('vim', 'ctags', 'git')
 
     } # End of PSData hashtable
 
