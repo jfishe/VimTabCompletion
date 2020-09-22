@@ -26,7 +26,7 @@ using namespace System.Management.Automation
 
 function Get-VimChildItem {
     [CmdletBinding()]
-    [OutputType([CompletionResult])]
+    [OutputType([System.Management.Automation.CompletionResult[]])]
     param (
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
@@ -41,7 +41,7 @@ function Get-VimChildItem {
         $ToolTip = $null
     )
 
-    [CompletionCompleters]::CompleteFilename("$Path") |
+    [System.Management.Automation.CompletionCompleters]::CompleteFilename("$Path") |
     ForEach-Object -Process {
         # [CompletionCompleters] have ReadOnly properties. To use the
         # nonpublic SetValue and avoid InvalidOperation: 'CompletionText'
