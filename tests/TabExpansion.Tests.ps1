@@ -1,4 +1,4 @@
-Describe "Vim TabExpansion Tests" {
+Describe "Vim TabExpansion Tests $($PSVersionTable.PSVersion) $($PSVersionTable.PSEdition)" {
     Context "Vim OPTIONS TabExpansion Tests" {
         BeforeAll {
             . $PSScriptRoot\Shared.ps1
