@@ -35,6 +35,17 @@ To install with [Chocolatey](https://chocolatey.org/):
 choco install universal-ctags
 ```
 
+### Git
+
+VimTabCompletion requires [`git`](https://git-scm.com/) to locate the project
+root for use by [ctags](#ctags).
+
+To install with [Chocolatey](https://chocolatey.org/):
+
+```PowerShell
+choco install git
+```
+
 ### VimTabCompletion Module
 
 VimTabCompletion exports PowerShell function TabExpansion but does not
@@ -94,6 +105,17 @@ $Env:BHBuildSystem = 'LocalRepo1'
 VimTabCompletion requires Vim and readtags.
 
 `.\build.ps1 -Task Test`
+
+## Change Log
+
+[git-chglog / git-chglog](https://github.com/git-chglog/git-chglog) generates
+[CHANGELOG.md](CHANGELOG.md). The template is in
+[.chglog/CHANGELOG.tpl.md](.chglog/CHANGELOG.tpl.md).
+
+```bash
+git-chglog -o CHANGELOG.md # To regenerate the change log
+git-chglog 1.0.0..2.0.0 # To update with range of tags
+```
 
 ## License
 
