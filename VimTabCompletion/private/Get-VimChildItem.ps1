@@ -26,7 +26,7 @@ using namespace System.Management.Automation
 
 function Get-VimChildItem {
     [CmdletBinding()]
-    [OutputType([System.Management.Automation.CompletionResult[]])]
+    [OutputType([CompletionResult])]
     param (
         [Parameter(Mandatory = $true, Position = 0)]
         [string]
@@ -41,7 +41,7 @@ function Get-VimChildItem {
         $ToolTip = $null
     )
 
-    [System.Management.Automation.CompletionCompleters]::CompleteFilename("$Path") |
+    [CompletionCompleters]::CompleteFilename("$Path") |
     ForEach-Object -Process {
         # [CompletionCompleters] have ReadOnly properties. To use the
         # nonpublic SetValue and avoid InvalidOperation: 'CompletionText'
@@ -52,10 +52,16 @@ function Get-VimChildItem {
             # expansion.  Otherwise file.log will pass to vim as
             # `vim -V10file .log`
             $Field = $_.GetType().GetField('_completionText', 'static,nonpublic,instance')
+            if ( $null -eq $Field ) {
+                $Field = $_.GetType().GetField('completionText', 'static,nonpublic,instance')
+            }
             $Field.SetValue($_, "'$($_.CompletionText)'")
         }
         if ( $null -ne $ToolTip ) {
             $Field = $_.GetType().GetField('_toolTip', 'static,nonpublic,instance')
+            if ( $null -eq $Field ) {
+                $Field = $_.GetType().GetField('toolTip', 'static,nonpublic,instance')
+            }
             $Field.SetValue($_, "$ToolTip")
         }
         $_
